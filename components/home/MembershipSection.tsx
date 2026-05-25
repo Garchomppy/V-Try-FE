@@ -11,7 +11,7 @@ export default function MembershipSection() {
             'url("https://images.unsplash.com/photo-1542272201-b1ca555f8505?q=80&w=2000&auto=format&fit=crop")',
         }}
       >
-        <div className="absolute inset-0 bg-black/30"></div>{" "}
+        <div className="absolute inset-0 bg-blac-k/30"></div>{" "}
         {/* Overlay for text contrast */}
       </div>
 
