@@ -35,11 +35,7 @@ const mockProducts = [
     discountPercentage: null,
     description:
       "The Essential Black Hoodie is your go-to layer for any season. Made with ultra-soft French terry fabric, it provides unmatched comfort and durability. Features a spacious kangaroo pocket and adjustable drawstring hood.",
-    images: [
-      "https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1509942774463-acf339cf87d5?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1512438258380-60b777a83d3d?q=80&w=800&auto=format&fit=crop",
-    ],
+    images: ["/images/pic1.jpg", "/images/pic2.jpg", "/images/pic3.jpg"],
     colors: [
       { name: "Black", hex: "#000000" },
       { name: "Charcoal", hex: "#4b5563" },
@@ -54,11 +50,7 @@ const mockProducts = [
     discountPercentage: 20,
     description:
       "A clean, modern take on the classic sweatshirt. The Minimalist Sweatshirt is crafted from a mid-weight cotton blend, ensuring breathability and warmth. Perfect for a casual day out or lounging at home.",
-    images: [
-      "https://images.unsplash.com/photo-1572495641004-28421ae52e52?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1620799140188-3b2a02fd9a77?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1614251057488-82542031a19f?q=80&w=800&auto=format&fit=crop",
-    ],
+    images: ["/images/pic4.jpg", "/images/pic6.jpg", "/images/pic7.jpg"],
     colors: [
       { name: "Light Grey", hex: "#e5e7eb" },
       { name: "Slate", hex: "#9ca3af" },
@@ -73,11 +65,7 @@ const mockProducts = [
     discountPercentage: null,
     description:
       "A timeless staple piece. Our Denim Jacket features premium rigid denim that molds to your body over time. Finished with classic metal hardware, contrast stitching, and multiple pockets for utility.",
-    images: [
-      "https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1495105787522-5334e3ffa0ef?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1520975954732-57dd22299614?q=80&w=800&auto=format&fit=crop",
-    ],
+    images: ["/images/pic10.jpg", "/images/pic9.jpg"],
     colors: [{ name: "Washed Blue", hex: "#3b82f6" }],
     sizes: ["S", "M", "L", "XL"],
     reviews: { rating: 4.5, count: 42 },
@@ -89,11 +77,7 @@ const mockProducts = [
     discountPercentage: null,
     description:
       "Function meets style in these Cotton Cargo Pants. Designed with a relaxed fit and ample pocket space, they are incredibly versatile. Made from durable cotton twill that can withstand rugged outdoor adventures or city living.",
-    images: [
-      "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1624378441864-6da5e65a7e6b?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1624378440523-28825bd83a8b?q=80&w=800&auto=format&fit=crop",
-    ],
+    images: ["/images/pic8.jpg", "/images/pic11.jpg", "/images/pic12.jpg"],
     colors: [
       { name: "Charcoal", hex: "#4b5563" },
       { name: "Forest Green", hex: "#064e3b" },

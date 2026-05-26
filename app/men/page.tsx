@@ -14,8 +14,7 @@ const menProducts = [
     id: "m2",
     name: "Essential Black Hoodie",
     price: 85,
-    image:
-      "https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=600&auto=format&fit=crop",
+    image: "/images/pic3.jpg",
     colors: ["#000000", "#4b5563"],
   },
   {
@@ -23,24 +22,21 @@ const menProducts = [
     name: "Minimalist Sweatshirt",
     price: 75,
     discountPercentage: 20,
-    image:
-      "https://images.unsplash.com/photo-1572495641004-28421ae52e52?q=80&w=600&auto=format&fit=crop",
+    image: "/images/pic7.jpg",
     colors: ["#e5e7eb", "#9ca3af"],
   },
   {
     id: "m4",
     name: "Denim Jacket",
     price: 120,
-    image:
-      "https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=600&auto=format&fit=crop",
+    image: "/images/pic9.jpg",
     colors: ["#3b82f6"],
   },
   {
     id: "m5",
     name: "Cotton Cargo Pants",
     price: 95,
-    image:
-      "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?q=80&w=600&auto=format&fit=crop",
+    image: "/images/pic12.jpg",
     colors: ["#4b5563", "#064e3b"],
   },
   {
