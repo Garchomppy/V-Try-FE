@@ -20,13 +20,13 @@ export default function FeaturedCategories() {
               href="#" 
               className="square-button bg-black text-white text-sm hover:bg-gray-800"
             >
-              See Men's
+              {"See Men's"}
             </Link>
             <Link 
               href="#" 
               className="square-button bg-gray-200 text-black text-sm hover:bg-gray-300"
             >
-              See Women's
+              {"See Women's"}
             </Link>
           </div>
         </div>

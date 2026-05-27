@@ -2,101 +2,27 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Heart, ShoppingBag, ChevronRight, Star, Ruler } from "lucide-react";
+import { Heart, ChevronRight, Star, Ruler, Sparkles } from "lucide-react";
 import { useParams } from "next/navigation";
 
-// 5 mock products for detailed view
-const mockProducts = [
-  {
-    id: "m1",
-    name: "Classic White Tee",
-    price: 35,
-    discountPercentage: null,
-    description:
-      "Crafted from premium heavyweight cotton, our Classic White Tee offers a relaxed silhouette that drapes perfectly. Features dropped shoulders, a ribbed crewneck, and our signature minimalist approach to everyday wear. Pre-shrunk to maintain its shape wash after wash.",
-    images: [
-      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=800&auto=format&fit=crop",
-    ],
-    colors: [
-      { name: "White", hex: "#ffffff" },
-      { name: "Black", hex: "#000000" },
-      { name: "Heather Grey", hex: "#d1d5db" },
-    ],
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-    reviews: { rating: 4.8, count: 124 },
-  },
-  {
-    id: "m2",
-    name: "Essential Black Hoodie",
-    price: 85,
-    discountPercentage: null,
-    description:
-      "The Essential Black Hoodie is your go-to layer for any season. Made with ultra-soft French terry fabric, it provides unmatched comfort and durability. Features a spacious kangaroo pocket and adjustable drawstring hood.",
-    images: ["/images/pic1.jpg", "/images/pic2.jpg", "/images/pic3.jpg"],
-    colors: [
-      { name: "Black", hex: "#000000" },
-      { name: "Charcoal", hex: "#4b5563" },
-    ],
-    sizes: ["S", "M", "L", "XL"],
-    reviews: { rating: 4.9, count: 89 },
-  },
-  {
-    id: "m3",
-    name: "Minimalist Sweatshirt",
-    price: 75,
-    discountPercentage: 20,
-    description:
-      "A clean, modern take on the classic sweatshirt. The Minimalist Sweatshirt is crafted from a mid-weight cotton blend, ensuring breathability and warmth. Perfect for a casual day out or lounging at home.",
-    images: ["/images/pic4.jpg", "/images/pic6.jpg", "/images/pic7.jpg"],
-    colors: [
-      { name: "Light Grey", hex: "#e5e7eb" },
-      { name: "Slate", hex: "#9ca3af" },
-    ],
-    sizes: ["M", "L", "XL", "XXL"],
-    reviews: { rating: 4.7, count: 56 },
-  },
-  {
-    id: "m4",
-    name: "Denim Jacket",
-    price: 120,
-    discountPercentage: null,
-    description:
-      "A timeless staple piece. Our Denim Jacket features premium rigid denim that molds to your body over time. Finished with classic metal hardware, contrast stitching, and multiple pockets for utility.",
-    images: ["/images/pic10.jpg", "/images/pic9.jpg"],
-    colors: [{ name: "Washed Blue", hex: "#3b82f6" }],
-    sizes: ["S", "M", "L", "XL"],
-    reviews: { rating: 4.5, count: 42 },
-  },
-  {
-    id: "m5",
-    name: "Cotton Cargo Pants",
-    price: 95,
-    discountPercentage: null,
-    description:
-      "Function meets style in these Cotton Cargo Pants. Designed with a relaxed fit and ample pocket space, they are incredibly versatile. Made from durable cotton twill that can withstand rugged outdoor adventures or city living.",
-    images: ["/images/pic8.jpg", "/images/pic11.jpg", "/images/pic12.jpg"],
-    colors: [
-      { name: "Charcoal", hex: "#4b5563" },
-      { name: "Forest Green", hex: "#064e3b" },
-    ],
-    sizes: ["28", "30", "32", "34", "36"],
-    reviews: { rating: 4.8, count: 110 },
-  },
-];
+import { products } from "../../data/products";
+import { availableFeatures } from "../../data/try-on-assets";
+import TryOnModal from "@/components/try-on/TryOnModal";
 
 export default function ProductDetailPage() {
   const params = useParams();
   const productId = params.id as string;
 
   const product =
-    mockProducts.find((p) => p.id === productId) || mockProducts[0]; // fallback to first if not found
+    products.find((p) => p.id === productId) || products[0];
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState(0);
   const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
+  const [tryOnOpen, setTryOnOpen] = useState(false);
+
+  const features = availableFeatures(product.tryOn);
+  const hasTryOn = features.ar || features.avatar3d || features.sizeSuggestion;
 
   const finalPrice = product.discountPercentage
     ? product.price * (1 - product.discountPercentage / 100)
@@ -121,7 +47,7 @@ export default function ProductDetailPage() {
 
       <div className="container mx-auto px-4 pb-24">
         <div className="flex flex-col lg:flex-row gap-12">
-          {/* Product Images - Left Side */}
+          {/* Product Images — Left */}
           <div className="w-full lg:w-3/5 flex flex-col-reverse md:flex-row gap-4">
             {/* Thumbnails */}
             <div className="flex md:flex-col gap-4 overflow-x-auto md:overflow-visible w-full md:w-24 shrink-0">
@@ -155,7 +81,7 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Product Details - Right Side */}
+          {/* Product Details — Right */}
           <div className="w-full lg:w-2/5 flex flex-col pt-4 lg:pt-8">
             <h1 className="text-3xl font-bold uppercase tracking-wide mb-2">
               {product.name}
@@ -240,32 +166,27 @@ export default function ProductDetailPage() {
                   </button>
                 ))}
               </div>
-
-              {/* V-Fit AI Suggestion Demo placeholder */}
-              <div className="mt-4 bg-gray-50 border border-gray-200 p-4 flex items-start gap-3">
-                <div className="bg-black text-white p-1.5 rounded-full mt-0.5">
-                  <Star className="w-3 h-3 fill-current" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold uppercase tracking-wider">
-                    V-Fit AI Suggestion
-                  </h4>
-                  <p className="text-xs text-gray-600 mt-1">
-                    Based on your profile, size <strong>{selectedSize}</strong>{" "}
-                    has a 95% fit match.
-                  </p>
-                </div>
-              </div>
             </div>
 
             {/* Actions */}
-            <div className="flex gap-4 mb-12">
-              <button className="flex-1 bg-black text-white py-4 uppercase font-bold tracking-widest hover:bg-gray-900 transition-colors">
-                Add to Cart
-              </button>
-              <button className="w-14 h-14 flex items-center justify-center border border-gray-300 hover:border-black transition-colors">
-                <Heart className="w-6 h-6" strokeWidth={1.5} />
-              </button>
+            <div className="flex flex-col gap-3 mb-12">
+              {hasTryOn && (
+                <button
+                  onClick={() => setTryOnOpen(true)}
+                  className="w-full flex items-center justify-center gap-2 border border-black bg-white text-black py-4 uppercase font-bold tracking-widest text-sm hover:bg-gray-50 transition-colors"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Try On with AI
+                </button>
+              )}
+              <div className="flex gap-4">
+                <button className="flex-1 bg-black text-white py-4 uppercase font-bold tracking-widest hover:bg-gray-900 transition-colors">
+                  Add to Cart
+                </button>
+                <button className="w-14 h-14 flex items-center justify-center border border-gray-300 hover:border-black transition-colors">
+                  <Heart className="w-6 h-6" strokeWidth={1.5} />
+                </button>
+              </div>
             </div>
 
             {/* Product Details Accordion Placeholders */}
@@ -285,6 +206,15 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* AI Try-On Modal */}
+      <TryOnModal
+        product={product}
+        open={tryOnOpen}
+        onClose={() => setTryOnOpen(false)}
+        selectedSize={selectedSize}
+        selectedColor={product.colors[selectedColor]?.hex ?? "#000000"}
+      />
     </div>
   );
 }
