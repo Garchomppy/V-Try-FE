@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
-import { getAnthropic, SIZE_SUGGESTION_MODEL } from "@/lib/try-on/claude/client";
+import { getGemini, SIZE_SUGGESTION_MODEL } from "@/lib/try-on/claude/client";
+// import { getAnthropic, SIZE_SUGGESTION_MODEL } from "@/lib/try-on/claude/client";
 import { systemPrompt, userPrompt } from "@/lib/try-on/claude/prompts";
 import {
   sizeSuggestionToolSchema,
@@ -69,6 +70,45 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    const gemini = getGemini();
+    const response = await gemini.models.generateContent({
+      model: SIZE_SUGGESTION_MODEL,
+      contents: userPrompt(product, measurements),
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "OBJECT",
+          properties: {
+            recommended_size: { type: "STRING" },
+            fit_percentage: { type: "NUMBER" },
+            advice: { type: "STRING" },
+          },
+          required: ["recommended_size", "fit_percentage", "advice"],
+        },
+      },
+    });
+
+    if (!response.text) {
+      return Response.json(fallback(product.tryOn.sizing.sizeChart));
+    }
+
+    let rawJson = response.text;
+    try {
+      rawJson = JSON.parse(response.text);
+    } catch {
+      // Ignore if already object or parse fails
+    }
+
+    const parsed = sizeSuggestionOutputSchema.safeParse(rawJson);
+    if (!parsed.success) {
+      return Response.json(fallback(product.tryOn.sizing.sizeChart));
+    }
+
+    return Response.json(parsed.data);
+
+    /*
+    // --- Bỏ comment đoạn này (và comment đoạn Gemini ở trên) nếu muốn dùng lại Claude ---
     const anthropic = getAnthropic();
     const message = await anthropic.messages.create({
       model: SIZE_SUGGESTION_MODEL,
@@ -101,8 +141,9 @@ export async function POST(req: NextRequest) {
     }
 
     return Response.json(parsed.data);
+    */
   } catch (err) {
-    console.error("[size-suggestion] Claude error:", err);
+    console.error("[size-suggestion] Gemini error:", err);
     return Response.json(fallback(product.tryOn.sizing.sizeChart));
   }
 }

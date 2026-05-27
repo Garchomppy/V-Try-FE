@@ -67,7 +67,7 @@ export default function SizeSuggestionForm({ product }: Props) {
   }
 
   if (state.status === "success") {
-    return <SizeSuggestionResult data={state.data} onReset={reset} />;
+    return <SizeSuggestionResult data={state.data} product={product} onReset={reset} />;
   }
 
   return (

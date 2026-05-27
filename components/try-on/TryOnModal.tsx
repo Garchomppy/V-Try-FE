@@ -51,9 +51,7 @@ export default function TryOnModal({
     "3d" as const,
   ];
 
-  const [tab, setTab] = useState<TryOnTab>(
-    hasSizing ? "size" : "ar",
-  );
+  const [tab, setTab] = useState<TryOnTab>(hasSizing ? "size" : "ar");
 
   // Prevent body scroll while open
   useEffect(() => {
@@ -62,13 +60,17 @@ export default function TryOnModal({
     } else {
       document.body.style.overflow = "";
     }
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [open]);
 
   // Close on Escape
   useEffect(() => {
     if (!open) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [open, onClose]);
@@ -88,7 +90,9 @@ export default function TryOnModal({
             <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-0.5">
               V-TRY AI
             </p>
-            <h2 className="text-sm font-bold uppercase tracking-wider">{product.name}</h2>
+            <h2 className="text-sm font-bold uppercase tracking-wider">
+              {product.name}
+            </h2>
           </div>
           <button
             onClick={onClose}
@@ -108,7 +112,7 @@ export default function TryOnModal({
       <div className="flex-1 overflow-hidden">
         {isSizeTab && (
           <div className="h-full overflow-y-auto">
-            <div className="max-w-sm mx-auto px-6 py-8">
+            <div className="max-w-4xl mx-auto px-6 py-8 w-full">
               <SizeSuggestionForm product={product} />
             </div>
           </div>

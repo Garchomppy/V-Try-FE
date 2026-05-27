@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Heart, ChevronRight, Star, Ruler, Sparkles } from "lucide-react";
+import { Heart, ChevronRight, Star, Ruler, Sparkles, X } from "lucide-react";
 import { useParams } from "next/navigation";
 
 import { products } from "../../data/products";
@@ -13,13 +13,13 @@ export default function ProductDetailPage() {
   const params = useParams();
   const productId = params.id as string;
 
-  const product =
-    products.find((p) => p.id === productId) || products[0];
+  const product = products.find((p) => p.id === productId) || products[0];
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState(0);
   const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
   const [tryOnOpen, setTryOnOpen] = useState(false);
+  const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
 
   const features = availableFeatures(product.tryOn);
   const hasTryOn = features.ar || features.avatar3d || features.sizeSuggestion;
@@ -147,7 +147,10 @@ export default function ProductDetailPage() {
                 <span className="text-sm font-semibold uppercase tracking-wider">
                   Size
                 </span>
-                <button className="text-xs text-gray-500 underline flex items-center gap-1 hover:text-black">
+                <button 
+                  onClick={() => setSizeGuideOpen(true)}
+                  className="text-xs text-gray-500 underline flex items-center gap-1 hover:text-black"
+                >
                   <Ruler className="w-3 h-3" /> Size Guide
                 </button>
               </div>
@@ -215,6 +218,71 @@ export default function ProductDetailPage() {
         selectedSize={selectedSize}
         selectedColor={product.colors[selectedColor]?.hex ?? "#000000"}
       />
+
+      {/* Size Guide Modal */}
+      {sizeGuideOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl relative">
+            <div className="flex items-center justify-between p-5 border-b border-gray-200">
+              <h3 className="text-lg font-bold uppercase tracking-widest">Size Guide</h3>
+              <button 
+                onClick={() => setSizeGuideOpen(false)} 
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto">
+              {product.tryOn?.sizing?.sizeChart && product.tryOn.sizing.sizeChart.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left text-gray-600">
+                    <thead className="text-xs uppercase bg-gray-50 text-gray-700">
+                      <tr>
+                        <th className="px-4 py-3 font-semibold border-b">Size</th>
+                        <th className="px-4 py-3 font-semibold border-b">Ngực (cm)</th>
+                        <th className="px-4 py-3 font-semibold border-b">Eo (cm)</th>
+                        {product.tryOn.sizing.sizeChart.some(s => s.hipsCm) && (
+                          <th className="px-4 py-3 font-semibold border-b">Mông (cm)</th>
+                        )}
+                        {product.tryOn.sizing.sizeChart.some(s => s.lengthCm) && (
+                          <th className="px-4 py-3 font-semibold border-b">Dài (cm)</th>
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {product.tryOn.sizing.sizeChart.map((row) => {
+                        const formatRange = (range?: [number, number]) => {
+                          if (!range || (range[0] === 0 && range[1] === 0)) return "-";
+                          return `${range[0]} - ${range[1]}`;
+                        };
+                        return (
+                          <tr key={row.size} className="border-b last:border-0 hover:bg-gray-50">
+                            <td className="px-4 py-3 font-bold border-r bg-gray-50/50">{row.size}</td>
+                            <td className="px-4 py-3">{formatRange(row.chestCm)}</td>
+                            <td className="px-4 py-3">{formatRange(row.waistCm)}</td>
+                            {product.tryOn?.sizing?.sizeChart?.some(s => s.hipsCm) && (
+                              <td className="px-4 py-3">{formatRange(row.hipsCm)}</td>
+                            )}
+                            {product.tryOn?.sizing?.sizeChart?.some(s => s.lengthCm) && (
+                              <td className="px-4 py-3">{row.lengthCm || "-"}</td>
+                            )}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                  <Ruler className="w-12 h-12 mb-3 opacity-20" />
+                  <p className="text-sm">Chưa có thông tin bảng size cho sản phẩm này.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
