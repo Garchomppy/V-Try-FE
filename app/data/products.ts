@@ -59,6 +59,12 @@ export const products: Product[] = [
         widthMultiplier: 1.7,
         aspectRatio: 1.2,
       },
+      model3D: {
+        src: "/try-on/models/p1-black-jacket.glb",
+        meshNodeNames: ["model"],
+        baseScale: 0.015,
+        positionOffset: [0, 0.83, 0.1],
+      },
       sizing: {
         fit: "regular",
         sizeChart: [
@@ -208,9 +214,10 @@ export const products: Product[] = [
         aspectRatio: 1.15,
       },
       model3D: {
-        src: "/try-on/models/p4-denim-jacket.glb",
+        src: "/try-on/models/p4-black-tank-top.glb",
         meshNodeNames: [],
-        baseScale: 0.015,
+        baseScale: 0.6,
+        positionOffset: [0, 0.2, 0.1],
       },
       sizing: {
         fit: "regular",

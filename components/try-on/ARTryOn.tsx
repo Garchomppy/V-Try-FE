@@ -245,17 +245,17 @@ export default function ARTryOn({ product }: Props = {}) {
   // Demo / standalone mode: fall back to the built-in GARMENTS list.
   const effectiveGarments: GarmentOption[] = product?.tryOn?.arOverlay
     ? [
-        {
-          id: product.id,
-          name: product.name,
-          image: product.tryOn.arOverlay.src,
-          emoji: "👕",
-          widthMultiplier: product.tryOn.arOverlay.widthMultiplier ?? 2.0,
-          aspectRatio: product.tryOn.arOverlay.aspectRatio ?? 1.2,
-          verticalOffsetRatio: product.tryOn.arOverlay.verticalOffsetRatio ?? 0,
-          description: product.description,
-        },
-      ]
+      {
+        id: product.id,
+        name: product.name,
+        image: product.tryOn.arOverlay.src,
+        emoji: "👕",
+        widthMultiplier: product.tryOn.arOverlay.widthMultiplier ?? 2.0,
+        aspectRatio: product.tryOn.arOverlay.aspectRatio ?? 1.2,
+        verticalOffsetRatio: product.tryOn.arOverlay.verticalOffsetRatio ?? 0,
+        description: product.description,
+      },
+    ]
     : GARMENTS;
 
   // True when a specific product was passed in (single-garment mode)
@@ -273,6 +273,8 @@ export default function ARTryOn({ product }: Props = {}) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handsRef = useRef<any>(null);
   const countdownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // True while the snapshot/result modal is open — gesture trigger is suppressed
+  const snapshotOpenRef = useRef(false);
 
   // Latest pose landmarks for the hand-gesture checker
   const latestPoseLandmarks = useRef<SmoothedLandmark[] | null>(null);
@@ -316,6 +318,9 @@ export default function ARTryOn({ product }: Props = {}) {
   const showSkeletonRef = useRef(showSkeleton);
   useEffect(() => { showSkeletonRef.current = showSkeleton; }, [showSkeleton]);
 
+  // Sync snapshotOpenRef so gesture callbacks can check without stale closures
+  useEffect(() => { snapshotOpenRef.current = snapshotUrl !== null; }, [snapshotUrl]);
+
   // ─── PRELOAD GARMENT IMAGE ───────────────────────────────────────────
   useEffect(() => {
     const img = new Image();
@@ -350,7 +355,8 @@ export default function ARTryOn({ product }: Props = {}) {
     setTryOnUrl(null);
     setTryOnState("generating");
     setTryOnError("");
-    setActiveTab("overlay"); // show overlay first while IDM-VTON runs
+    // Only reset to overlay on a fresh trigger — don't yank user away if they're already watching the tryon tab
+    setActiveTab((prev) => (prev === "tryon" ? "tryon" : "overlay"));
 
     const garment = selectedGarmentRef.current;
 
@@ -420,6 +426,7 @@ export default function ARTryOn({ product }: Props = {}) {
   // ─── CHECK GESTURE EACH FRAME ────────────────────────────────────────
   const checkGesture = useCallback(() => {
     if (countdownTimerRef.current) return;
+    if (snapshotOpenRef.current) return; // modal is open — don't re-trigger
 
     const pose = latestPoseLandmarks.current;
     const hands = latestHandData.current;
@@ -477,7 +484,7 @@ export default function ARTryOn({ product }: Props = {}) {
       const baseVOffset = torsoLength * verticalOffsetRatio;
 
       // Overlay uses fixed math-based positioning (no AI params needed)
-      const scale = 1.0;
+      const scale = 1.2;
       const dxPx = 0;
       const dyPx = 0;
       const rotExtra = 0;
@@ -494,7 +501,7 @@ export default function ARTryOn({ product }: Props = {}) {
         ctx.drawImage(
           garmentImgRef.current,
           -clothingWidth / 2,
-          -clothingHeight * 0.25,
+          -clothingHeight * 0.3,
           clothingWidth,
           clothingHeight,
         );
@@ -1067,22 +1074,20 @@ export default function ARTryOn({ product }: Props = {}) {
             <div className="flex border-b border-zinc-800 bg-zinc-950/50">
               <button
                 onClick={() => setActiveTab("overlay")}
-                className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-all border-b-2 ${
-                  activeTab === "overlay"
-                    ? "border-[#FF6F61] text-white"
-                    : "border-transparent text-zinc-500 hover:text-zinc-300"
-                }`}
+                className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-all border-b-2 ${activeTab === "overlay"
+                  ? "border-[#FF6F61] text-white"
+                  : "border-transparent text-zinc-500 hover:text-zinc-300"
+                  }`}
               >
                 <Layers className="w-4 h-4" />
                 AR Overlay
               </button>
               <button
                 onClick={() => setActiveTab("tryon")}
-                className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-all border-b-2 ${
-                  activeTab === "tryon"
-                    ? "border-violet-500 text-white"
-                    : "border-transparent text-zinc-500 hover:text-zinc-300"
-                }`}
+                className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-all border-b-2 ${activeTab === "tryon"
+                  ? "border-violet-500 text-white"
+                  : "border-transparent text-zinc-500 hover:text-zinc-300"
+                  }`}
               >
                 <ImageIcon className="w-4 h-4" />
                 AI Try-On

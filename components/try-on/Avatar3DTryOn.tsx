@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, Suspense, useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
 import {
   OrbitControls,
@@ -9,68 +9,24 @@ import {
   useGLTF,
 } from "@react-three/drei";
 import * as THREE from "three";
-import { Settings, UserCircle2, Info, Ruler, X } from "lucide-react";
+import { Settings, UserCircle2, Ruler, X } from "lucide-react";
 import {
   computeBodyScale,
   DEFAULT_BODY_PARAMS,
   type BodyParams,
 } from "@/lib/try-on/math/body-scale";
 import { SHARED_AVATAR_BODY } from "@/app/data/try-on-assets";
+import type { Product } from "@/app/data/products";
 
-// ─── GARMENT CATALOGUE ────────────────────────────────────────────────────────
-
-interface Garment3D {
-  id: string;
-  name: string;
-  emoji: string;
-  src: string;
-  meshNodeNames: string[];
-  baseScale: number;
-  positionOffset: [number, number, number];
-  thumbnail?: string;
-}
-
-const GARMENTS_3D: Garment3D[] = [
-  {
-    id: "hoodie",
-    name: "Black Hoodie",
-    emoji: "🧥",
-    src: "/try-on/models/p2-hoodie.glb",
-    meshNodeNames: ["AM_102_035_003_AM_102_035_002_0"],
-    baseScale: 0.015,
-    positionOffset: [0, 0.83, 0.1],
-  },
-  {
-    id: "sweatshirt",
-    name: "Sweatshirt",
-    emoji: "👔",
-    src: "/try-on/models/p3-sweatshirt.glb",
-    meshNodeNames: ["AM_102_035_003_AM_102_035_002_0"],
-    baseScale: 0.015,
-    positionOffset: [0, 0.83, 0.1],
-  },
-];
-
-// Preload all models eagerly
 useGLTF.preload(SHARED_AVATAR_BODY.src);
-GARMENTS_3D.forEach((g) => useGLTF.preload(g.src));
-
-const COLORS = [
-  { name: "Coral Red", hex: "#FF6F61" },
-  { name: "Navy Blue", hex: "#1e3a8a" },
-  { name: "Forest Green", hex: "#065f46" },
-  { name: "Onyx Black", hex: "#111827" },
-  { name: "Heather Gray", hex: "#9ca3af" },
-];
 
 // ─── MANNEQUIN ────────────────────────────────────────────────────────────────
 
 interface MannequinProps {
   bodyParams: BodyParams;
-  skinColor: string;
 }
 
-function Mannequin({ bodyParams, skinColor }: MannequinProps) {
+function Mannequin({ bodyParams }: MannequinProps) {
   const group = useRef<THREE.Group>(null);
   const { nodes } = useGLTF(SHARED_AVATAR_BODY.src);
   const { scaleY, scaleXZ } = computeBodyScale(bodyParams, SHARED_AVATAR_BODY.baseScale);
@@ -88,7 +44,7 @@ function Mannequin({ bodyParams, skinColor }: MannequinProps) {
           if (!mesh?.geometry) return null;
           return (
             <mesh key={name} geometry={mesh.geometry}>
-              <meshStandardMaterial color={skinColor} roughness={0.4} />
+              <meshStandardMaterial color="#d4bfae" roughness={0.4} />
             </mesh>
           );
         })}
@@ -99,17 +55,39 @@ function Mannequin({ bodyParams, skinColor }: MannequinProps) {
 
 // ─── GARMENT MESH ─────────────────────────────────────────────────────────────
 
-interface GarmentMeshInnerProps {
-  garment: Garment3D;
+interface GarmentMeshProps {
+  src: string;
+  baseScale: number;
+  positionOffset: [number, number, number];
   bodyParams: BodyParams;
-  garmentColor: string;
+  color: string;
   sizeMultiplier: number;
 }
 
-function GarmentMeshInner({ garment, bodyParams, garmentColor, sizeMultiplier }: GarmentMeshInnerProps) {
-  const { nodes } = useGLTF(garment.src);
-  const { scaleY, scaleXZ } = computeBodyScale(bodyParams, garment.baseScale);
-  const [px, py, pz] = garment.positionOffset;
+function GarmentMesh({
+  src,
+  baseScale,
+  positionOffset,
+  bodyParams,
+  color,
+  sizeMultiplier,
+}: GarmentMeshProps) {
+  const { scene } = useGLTF(src);
+  const { scaleY, scaleXZ } = computeBodyScale(bodyParams, baseScale);
+  const [px, py, pz] = positionOffset;
+
+  // Clone scene once per src; share a single material across all child meshes
+  const { clonedScene, mat } = useMemo(() => {
+    const clonedScene = scene.clone(true);
+    const mat = new THREE.MeshStandardMaterial({ roughness: 0.8, side: THREE.DoubleSide });
+    clonedScene.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) (child as THREE.Mesh).material = mat;
+    });
+    return { clonedScene, mat };
+  }, [scene]);
+
+  // Update color in-place without recloning
+  mat.color.set(color);
 
   return (
     <group
@@ -121,35 +99,28 @@ function GarmentMeshInner({ garment, bodyParams, garmentColor, sizeMultiplier }:
       ]}
       dispose={null}
     >
-      {garment.meshNodeNames.map((name) => {
-        const mesh = nodes[name] as THREE.Mesh | undefined;
-        if (!mesh?.geometry) return null;
-        return (
-          <mesh key={name} geometry={mesh.geometry}>
-            <meshStandardMaterial
-              color={garmentColor}
-              roughness={0.8}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-        );
-      })}
+      <primitive object={clonedScene} />
     </group>
   );
 }
 
 // ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
 
-export default function Avatar3DTryOn() {
+interface Props {
+  product: Product;
+}
+
+export default function Avatar3DTryOn({ product }: Props) {
+  const model3D = product.tryOn?.model3D;
+  const colors = product.colors;
+  const sizes = product.sizes;
+
   const [bodyParams, setBodyParams] = useState<BodyParams>(DEFAULT_BODY_PARAMS);
   const [isTryOn, setIsTryOn] = useState(false);
   const [activeTab, setActiveTab] = useState<"standard" | "mybody">("standard");
   const [showBodyPanel, setShowBodyPanel] = useState(true);
-  const [showProductPanel, setShowProductPanel] = useState(true);
-
-  const [selectedGarment, setSelectedGarment] = useState<Garment3D>(GARMENTS_3D[0]);
-  const [selectedColor, setSelectedColor] = useState(COLORS[0].hex);
-  const [selectedSize, setSelectedSize] = useState("M");
+  const [selectedColor, setSelectedColor] = useState(colors[0]?.hex ?? "#111827");
+  const [selectedSize, setSelectedSize] = useState(sizes[0] ?? "M");
 
   function handleParam(field: keyof BodyParams, value: number) {
     setBodyParams((p) => ({ ...p, [field]: value }));
@@ -159,17 +130,20 @@ export default function Avatar3DTryOn() {
 
   const sizeMultiplier =
     selectedSize === "S" ? 0.95
-    : selectedSize === "L" ? 1.05
-    : selectedSize === "XL" ? 1.1
-    : selectedSize === "XXL" ? 1.15
-    : 1.0;
+      : selectedSize === "L" ? 1.05
+        : selectedSize === "XL" ? 1.1
+          : selectedSize === "XXL" ? 1.15
+            : 1.0;
 
   return (
     <div className="relative w-full h-full bg-zinc-50 overflow-hidden">
       {/* 3D Canvas */}
       <div className="absolute inset-0 cursor-grab active:cursor-grabbing">
-        <Canvas camera={{ position: [0, 1.5, 4], fov: 45 }}>
-          {/* Custom lighting — no external HDR needed (avoids CSP/fetch issues) */}
+        <Canvas
+          camera={{ position: [0, 1.5, 4], fov: 45 }}
+          gl={{ antialias: false, powerPreference: "high-performance", stencil: false }}
+          dpr={[1, 1.5]}
+        >
           <ambientLight intensity={0.6} />
           <hemisphereLight args={["#ffeeb1", "#080820", 0.5]} />
           <directionalLight position={[5, 5, 5]} intensity={1.5} castShadow />
@@ -177,24 +151,25 @@ export default function Avatar3DTryOn() {
           <spotLight position={[0, 8, 0]} intensity={0.4} angle={0.6} penumbra={1} />
 
           <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.1}>
-            <Mannequin bodyParams={effectiveBody} skinColor="#d4bfae" />
-            {isTryOn && (
-              <GarmentMeshInner
-                garment={selectedGarment}
-                bodyParams={effectiveBody}
-                garmentColor={selectedColor}
-                sizeMultiplier={sizeMultiplier}
-              />
+            {/* Separate Suspense per mesh so mannequin stays visible while garment loads */}
+            <Suspense fallback={null}>
+              <Mannequin bodyParams={effectiveBody} />
+            </Suspense>
+            {isTryOn && model3D && (
+              <Suspense fallback={null}>
+                <GarmentMesh
+                  src={model3D.src}
+                  baseScale={model3D.baseScale}
+                  positionOffset={model3D.positionOffset ?? [0, 0.83, 0.1]}
+                  bodyParams={effectiveBody}
+                  color={selectedColor}
+                  sizeMultiplier={sizeMultiplier}
+                />
+              </Suspense>
             )}
           </Float>
 
-          <ContactShadows
-            position={[0, -2, 0]}
-            opacity={0.4}
-            scale={5}
-            blur={2}
-            far={4}
-          />
+          <ContactShadows position={[0, -2, 0]} opacity={0.4} scale={5} blur={2} far={4} />
           <OrbitControls
             enablePan={false}
             minPolarAngle={Math.PI / 4}
@@ -205,104 +180,12 @@ export default function Avatar3DTryOn() {
         </Canvas>
       </div>
 
-      {/* ── LEFT PANEL: Garment Info ────────────────────────────────────── */}
-      <div
-        className={`absolute top-4 left-4 md:top-6 md:left-6 z-20 transition-all duration-500 ease-in-out ${
-          showProductPanel ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0 pointer-events-none"
-        }`}
-      >
-        <div className="p-5 bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 w-72 relative">
-          <button
-            onClick={() => setShowProductPanel(false)}
-            className="absolute top-4 right-4 p-1.5 text-gray-400 hover:text-gray-900 transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
-
-          <div className="flex items-center gap-2 mb-4 text-[#FF6F61]">
-            <Info className="w-4 h-4" />
-            <h2 className="text-xs font-bold tracking-widest uppercase">Chọn trang phục</h2>
-          </div>
-
-          {/* Garment selector */}
-          <div className="flex flex-col gap-2 mb-5">
-            {GARMENTS_3D.map((g) => (
-              <button
-                key={g.id}
-                onClick={() => setSelectedGarment(g)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all text-left ${
-                  selectedGarment.id === g.id
-                    ? "border-[#FF6F61] bg-[#FF6F61]/5 text-gray-900"
-                    : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
-                }`}
-              >
-                <span className="text-xl">{g.emoji}</span>
-                <div>
-                  <p className="text-xs font-bold">{g.name}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-
-          {/* Size selector */}
-          <div className="mb-5">
-            <div className="flex justify-between items-center mb-2">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                Chọn size
-              </label>
-              <button className="text-xs text-[#FF6F61] hover:underline flex items-center gap-1">
-                <Ruler className="w-3 h-3" /> Bảng size
-              </button>
-            </div>
-            <div className="flex gap-2">
-              {["S", "M", "L", "XL"].map((size) => (
-                <button
-                  key={size}
-                  onClick={() => setSelectedSize(size)}
-                  className={`flex-1 py-2 text-sm font-bold rounded-lg border transition-all ${
-                    selectedSize === size
-                      ? "border-[#FF6F61] bg-[#FF6F61]/10 text-[#FF6F61]"
-                      : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
-                  }`}
-                >
-                  {size}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Try On button */}
-          <button
-            onClick={() => setIsTryOn((v) => !v)}
-            className={`w-full font-bold py-3 rounded-xl transition-colors shadow-lg text-sm ${
-              isTryOn
-                ? "bg-white text-gray-900 border-2 border-gray-900 hover:bg-gray-50"
-                : "bg-[#FF6F61] text-white hover:bg-[#fa5c4d]"
-            }`}
-          >
-            {isTryOn ? "Bỏ áo" : "Thử áo 3D"}
-          </button>
-        </div>
-      </div>
-
-      {/* Left panel toggle */}
-      {!showProductPanel && (
-        <button
-          onClick={() => setShowProductPanel(true)}
-          className="absolute top-6 left-6 z-20 bg-white/90 backdrop-blur-md p-3.5 rounded-2xl shadow-xl border border-white/20 text-gray-900 hover:bg-white transition-all"
-        >
-          <Info className="w-5 h-5 text-[#FF6F61]" />
-        </button>
-      )}
-
       {/* ── RIGHT PANEL: Body Stats ──────────────────────────────────────── */}
       <div
-        className={`absolute top-4 right-4 md:top-6 md:right-6 z-20 transition-all duration-500 ease-in-out ${
-          showBodyPanel ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none"
-        }`}
+        className={`absolute top-4 right-4 md:top-6 md:right-6 z-20 transition-all duration-500 ease-in-out ${showBodyPanel ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none"
+          }`}
       >
         <div className="w-72 relative">
-          {/* Tab switcher */}
           <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-2 mb-3 relative">
             <button
               onClick={() => setShowBodyPanel(false)}
@@ -313,22 +196,20 @@ export default function Avatar3DTryOn() {
             <div className="flex">
               <button
                 onClick={() => setActiveTab("standard")}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold rounded-xl transition-all ${
-                  activeTab === "standard"
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold rounded-xl transition-all ${activeTab === "standard"
                     ? "bg-white shadow-sm text-gray-900"
                     : "text-gray-500 hover:text-gray-700"
-                }`}
+                  }`}
               >
                 <UserCircle2 className="w-3.5 h-3.5" />
                 Chuẩn
               </button>
               <button
                 onClick={() => setActiveTab("mybody")}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold rounded-xl transition-all ${
-                  activeTab === "mybody"
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold rounded-xl transition-all ${activeTab === "mybody"
                     ? "bg-[#FF6F61] text-white shadow-sm"
                     : "text-gray-500 hover:text-gray-700"
-                }`}
+                  }`}
               >
                 <Settings className="w-3.5 h-3.5" />
                 Số đo AI
@@ -336,7 +217,6 @@ export default function Avatar3DTryOn() {
             </div>
           </div>
 
-          {/* Body params sliders */}
           {activeTab === "mybody" && (
             <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-5">
               <h3 className="text-xs font-bold text-gray-900 mb-4">Điều chỉnh số đo</h3>
@@ -353,7 +233,9 @@ export default function Avatar3DTryOn() {
                   <div key={field}>
                     <div className="flex justify-between text-[10px] font-semibold text-gray-500 mb-1.5 px-1">
                       <span>{label}</span>
-                      <span>{bodyParams[field]} {unit}</span>
+                      <span>
+                        {bodyParams[field]} {unit}
+                      </span>
                     </div>
                     <input
                       type="range"
@@ -371,7 +253,6 @@ export default function Avatar3DTryOn() {
         </div>
       </div>
 
-      {/* Right panel toggle */}
       {!showBodyPanel && (
         <button
           onClick={() => setShowBodyPanel(true)}
@@ -381,28 +262,67 @@ export default function Avatar3DTryOn() {
         </button>
       )}
 
-      {/* ── BOTTOM: Color Picker ─────────────────────────────────────────── */}
+      {/* ── BOTTOM: Size + Color + Try On ─────────────────────────────────── */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
-        <div className="bg-white/90 backdrop-blur-xl px-6 py-4 rounded-2xl shadow-2xl border border-white/20 flex flex-col items-center">
-          <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">
-            {COLORS.find((c) => c.hex === selectedColor)?.name}
-          </span>
-          <div className="flex items-center gap-4">
-            {COLORS.map((color) => (
-              <button
-                key={color.hex}
-                onClick={() => setSelectedColor(color.hex)}
-                className={`w-9 h-9 rounded-full border-2 transition-all duration-300 ${
-                  selectedColor === color.hex
-                    ? "border-gray-900 scale-110 shadow-md"
-                    : "border-transparent hover:scale-110"
-                }`}
-                style={{ backgroundColor: color.hex }}
-                aria-label={`Chọn ${color.name}`}
-              />
-            ))}
+        <div className="bg-white/90 backdrop-blur-xl px-6 py-4 rounded-2xl shadow-2xl border border-white/20 flex flex-col items-center gap-3">
+          {/* Size selector */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+              <Ruler className="w-3 h-3" /> Size
+            </span>
+            <div className="flex gap-1.5">
+              {sizes.map((size) => (
+                <button
+                  key={size}
+                  onClick={() => setSelectedSize(size)}
+                  className={`w-8 h-8 text-xs font-bold rounded-lg border transition-all ${selectedSize === size
+                      ? "border-[#FF6F61] bg-[#FF6F61]/10 text-[#FF6F61]"
+                      : "border-gray-200 text-gray-600 hover:border-gray-300"
+                    }`}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="mt-3 text-[10px] text-gray-400 font-medium tracking-wide">
+
+          {/* Color picker */}
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-bold text-gray-500 min-w-[80px] text-center">
+              {colors.find((c) => c.hex === selectedColor)?.name}
+            </span>
+            <div className="flex items-center gap-2">
+              {colors.map((color) => (
+                <button
+                  key={color.hex}
+                  onClick={() => setSelectedColor(color.hex)}
+                  className={`w-7 h-7 rounded-full border-2 transition-all duration-300 ${selectedColor === color.hex
+                      ? "border-gray-900 scale-110 shadow-md"
+                      : "border-transparent hover:scale-110"
+                    }`}
+                  style={{ backgroundColor: color.hex }}
+                  aria-label={`Chọn ${color.name}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Try On button */}
+          {model3D ? (
+            <button
+              onClick={() => setIsTryOn((v) => !v)}
+              className={`px-8 font-bold py-2.5 rounded-xl transition-colors shadow-lg text-sm ${isTryOn
+                  ? "bg-white text-gray-900 border-2 border-gray-900 hover:bg-gray-50"
+                  : "bg-[#FF6F61] text-white hover:bg-[#fa5c4d]"
+                }`}
+            >
+              {isTryOn ? "Bỏ áo" : "Thử áo 3D"}
+            </button>
+          ) : (
+            <p className="text-xs text-gray-400 italic">Chưa có model 3D</p>
+          )}
+
+          <div className="text-[10px] text-gray-400 font-medium tracking-wide">
             🖱️ KÉO ĐỂ XOAY · CUỘN ĐỂ ZOOM
           </div>
         </div>

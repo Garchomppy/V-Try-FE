@@ -109,44 +109,58 @@ export async function POST(req: NextRequest) {
     garmentBlob = new Blob([garmentBuffer], { type: "image/png" });
   }
 
-  try {
-    console.log(`[virtual-tryon] Connecting to Kwai-Kolors/Kolors-Virtual-Try-On for garment: ${garmentId}`);
+  // Attempt the Gradio predict with reconnect retry for session expiry errors
+  const MAX_ATTEMPTS = 2;
 
+  async function runPredict(personBlob: Blob, garmentBlob: Blob) {
     const client = await Client.connect("Kwai-Kolors/Kolors-Virtual-Try-On", {
       events: ["log", "status"],
     });
-
-    console.log("[virtual-tryon] Connected, sending tryon request...");
 
     // Kwai-Kolors/Kolors-Virtual-Try-On Endpoint 2 accepts:
     // [Person Image, Garment Image, Seed (number), Random Seed (boolean)]
     const result = await client.predict(2, [
       handle_file(personBlob),
       handle_file(garmentBlob),
-      42,   // Seed
-      true, // Random seed
+      42,
+      true,
     ]);
 
-    // Result is [output_image, seed_used, response_text]
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data = result.data as any[];
     const outputImage = data?.[0];
+    if (!outputImage) throw new Error("Kolors Virtual Try-On returned no output image");
 
-    if (!outputImage) {
-      throw new Error("Kolors Virtual Try-On returned no output image");
+    if (typeof outputImage === "string") return outputImage;
+    if (outputImage?.url) return outputImage.url as string;
+    if (outputImage?.path) return outputImage.path as string;
+    throw new Error("Unexpected output format from Kolors Virtual Try-On");
+  }
+
+  try {
+    let imageUrl: string | undefined;
+    let lastErr: unknown;
+
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      try {
+        console.log(`[virtual-tryon] Connecting to Kwai-Kolors/Kolors-Virtual-Try-On (attempt ${attempt}/${MAX_ATTEMPTS}) for garment: ${garmentId}`);
+        imageUrl = await runPredict(personBlob, garmentBlob);
+        break;
+      } catch (err) {
+        lastErr = err;
+        const msg = err instanceof Error ? err.message : String(err);
+        // Retry only on session expiry / socket close — these are transient cold-start failures
+        const isRetryable =
+          msg.includes("Session not found") ||
+          msg.includes("terminated") ||
+          msg.includes("socket") ||
+          msg.includes("UND_ERR");
+        if (!isRetryable || attempt === MAX_ATTEMPTS) throw err;
+        console.warn(`[virtual-tryon] Retryable error on attempt ${attempt}: ${msg} — reconnecting...`);
+      }
     }
 
-    // Gradio returns either a URL or an object with .url / .path
-    let imageUrl: string;
-    if (typeof outputImage === "string") {
-      imageUrl = outputImage;
-    } else if (outputImage?.url) {
-      imageUrl = outputImage.url as string;
-    } else if (outputImage?.path) {
-      imageUrl = outputImage.path as string;
-    } else {
-      throw new Error("Unexpected output format from Kolors Virtual Try-On");
-    }
+    if (!imageUrl) throw lastErr;
 
     // If it's a remote URL, fetch and convert to base64 data URL
     // so the client doesn't need to handle CORS
@@ -159,7 +173,6 @@ export async function POST(req: NextRequest) {
       const mimeType = imgRes.headers.get("content-type") ?? "image/png";
       resultUrl = `data:${mimeType};base64,${imgB64}`;
     } else {
-      // Already a data URL
       resultUrl = imageUrl;
     }
 
@@ -170,7 +183,6 @@ export async function POST(req: NextRequest) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("[virtual-tryon] Kolors Virtual Try-On error:", msg);
 
-    // Graceful fallback — don't surface raw error to client
     return NextResponse.json(
       {
         fallback: true,

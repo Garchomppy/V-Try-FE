@@ -127,7 +127,7 @@ export default function TryOnModal({
 
         {is3DTab && (
           <div className="h-full">
-            <Avatar3DTryOn />
+            <Avatar3DTryOn product={product} />
           </div>
         )}
       </div>

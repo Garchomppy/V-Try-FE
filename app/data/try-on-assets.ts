@@ -24,7 +24,7 @@ export interface TryOnFeatures {
 export function availableFeatures(tryOn: TryOnConfig | undefined): TryOnFeatures {
   return {
     ar: Boolean(tryOn?.arOverlay?.src),
-    avatar3d: Boolean(tryOn?.model3D?.src && tryOn.model3D.meshNodeNames.length > 0),
+    avatar3d: Boolean(tryOn?.model3D?.src),
     sizeSuggestion: Boolean(tryOn?.sizing?.sizeChart?.length),
   };
 }
