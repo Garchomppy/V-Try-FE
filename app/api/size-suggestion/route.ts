@@ -3,7 +3,6 @@ import { getGemini, SIZE_SUGGESTION_MODEL } from "@/lib/try-on/claude/client";
 // import { getAnthropic, SIZE_SUGGESTION_MODEL } from "@/lib/try-on/claude/client";
 import { systemPrompt, userPrompt } from "@/lib/try-on/claude/prompts";
 import {
-  sizeSuggestionToolSchema,
   sizeSuggestionOutputSchema,
   type SizeSuggestion,
   type SizeSuggestionRequest,

@@ -39,8 +39,8 @@ export default function TryOnModal({
   product,
   open,
   onClose,
-  selectedSize,
-  selectedColor,
+  selectedSize: _selectedSize,
+  selectedColor: _selectedColor,
 }: Props) {
   // AR and 3D are always available — garment selection is done inside those components
   const hasSizing = Boolean(product.tryOn?.sizing?.sizeChart?.length);

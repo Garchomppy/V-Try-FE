@@ -22,7 +22,7 @@
  *             Falls back to the built-in GARMENTS demo list when omitted.
  */
 
-import { useRef, useEffect, useState, useCallback } from "react";
+import React, { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import type { Product } from "@/app/data/products";
 import Webcam from "react-webcam";
 import {
@@ -243,7 +243,7 @@ export default function ARTryOn({ product }: Props = {}) {
   // ─── EFFECTIVE GARMENTS ───────────────────────────────────────────────────
   // Single-product mode: derive one GarmentOption from the product's arOverlay.
   // Demo / standalone mode: fall back to the built-in GARMENTS list.
-  const effectiveGarments: GarmentOption[] = product?.tryOn?.arOverlay
+  const effectiveGarments = useMemo<GarmentOption[]>(() => product?.tryOn?.arOverlay
     ? [
       {
         id: product.id,
@@ -256,7 +256,7 @@ export default function ARTryOn({ product }: Props = {}) {
         description: product.description,
       },
     ]
-    : GARMENTS;
+    : GARMENTS, [product]);
 
   // True when a specific product was passed in (single-garment mode)
   const isSingleProductMode = effectiveGarments.length === 1;
@@ -265,7 +265,7 @@ export default function ARTryOn({ product }: Props = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const garmentImgRef = useRef<HTMLImageElement | null>(null);
   const smoothedLandmarksRef = useRef<SmoothedLandmark[] | null>(null);
-  const fpsRef = useRef({ count: 0, lastTime: performance.now(), fps: 0 });
+  const fpsRef = useRef({ count: 0, lastTime: 0, fps: 0 });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cameraRef = useRef<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -333,6 +333,7 @@ export default function ARTryOn({ product }: Props = {}) {
   // ─── FPS ────────────────────────────────────────────────────────────
   const updateFps = useCallback(() => {
     const now = performance.now();
+    if (fpsRef.current.lastTime === 0) fpsRef.current.lastTime = now;
     fpsRef.current.count++;
     if (now - fpsRef.current.lastTime >= 1000) {
       fpsRef.current.fps = fpsRef.current.count;
@@ -412,7 +413,7 @@ export default function ARTryOn({ product }: Props = {}) {
         }
       }, 1000);
     },
-    [triggerAISnapshot],
+    [triggerAISnapshot, effectiveGarments],
   );
 
   const cancelCountdown = useCallback(() => {
@@ -632,13 +633,20 @@ export default function ARTryOn({ product }: Props = {}) {
       try {
         setLoadingProgress("Loading AI Pose Model...");
 
-        const loadScriptGlobal = async (url: string, globalName: string) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          if (typeof (window as any)[globalName] === "function") return;
-          const res = await fetch(url);
-          if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`);
-          const code = await res.text();
-          (0, eval)(code); // indirect eval → runs in global scope
+        const loadScriptGlobal = (url: string, globalName: string) => {
+          return new Promise<void>((resolve, reject) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if (typeof (window as any)[globalName] === "function") {
+              resolve();
+              return;
+            }
+            const script = document.createElement("script");
+            script.src = url;
+            script.crossOrigin = "anonymous";
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error(`Failed to fetch ${url}`));
+            document.body.appendChild(script);
+          });
         };
 
         await loadScriptGlobal(
