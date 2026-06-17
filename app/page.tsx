@@ -5,27 +5,23 @@ import ProductCarousel from "@/components/home/ProductCarousel";
 import MembershipSection from "@/components/home/MembershipSection";
 import NewsletterSection from "@/components/home/NewsletterSection";
 
-import { products } from "./data/products";
+import { getAllProducts } from "@/lib/db/products";
 
-const classicProducts = products.map((product) => ({
-  id: product.id,
-  name: product.name,
-  price: product.price,
-  discountPercentage: product.discountPercentage || undefined,
-  image: product.images[0],
-  colors: product.colors.map((c) => c.hex),
-}));
+export default async function Home() {
+  const products = await getAllProducts();
 
-const bestSellers = products.map((product) => ({
-  id: product.id,
-  name: product.name,
-  price: product.price,
-  discountPercentage: product.discountPercentage || undefined,
-  image: product.images[0],
-  colors: product.colors.map((c) => c.hex),
-}));
+  const toCard = (product: (typeof products)[number]) => ({
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    discountPercentage: product.discountPercentage || undefined,
+    image: product.images[0],
+    colors: product.colors.map((c) => c.hex),
+  });
 
-export default function Home() {
+  const classicProducts = products.map(toCard);
+  const bestSellers = products.map(toCard);
+
   return (
     <div className="flex flex-col w-full">
       <HeroSection />

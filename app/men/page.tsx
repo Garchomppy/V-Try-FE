@@ -1,18 +1,20 @@
 import Link from "next/link";
 import { Heart, ShoppingBag } from "lucide-react";
 
-import { products } from "../data/products";
+import { getAllProducts } from "@/lib/db/products";
 
-const menProducts = products.map((product) => ({
-  id: product.id,
-  name: product.name,
-  price: product.price,
-  discountPercentage: product.discountPercentage || undefined,
-  image: product.images[0], // primary image is the first one
-  colors: product.colors.map((c) => c.hex),
-}));
+export default async function MenPage() {
+  const products = await getAllProducts();
 
-export default function MenPage() {
+  const menProducts = products.map((product) => ({
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    discountPercentage: product.discountPercentage || undefined,
+    image: product.images[0], // primary image is the first one
+    colors: product.colors.map((c) => c.hex),
+  }));
+
   return (
     <div className="container mx-auto px-4 py-16 min-h-screen">
       <div className="text-center mb-16">
