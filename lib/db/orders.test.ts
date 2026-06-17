@@ -40,4 +40,25 @@ describe("buildOrderRow", () => {
     expect(row.items).toEqual(items);
     expect(row.status).toBe("pending");
   });
+
+  it("sets user_id when provided", () => {
+    const row = buildOrderRow({
+      customerName: "Nam",
+      customerPhone: "0901234567",
+      customerAddress: "123 Lê Lợi, HCM",
+      items,
+      userId: "user-123",
+    });
+    expect(row.user_id).toBe("user-123");
+  });
+
+  it("sets user_id to null when not provided", () => {
+    const row = buildOrderRow({
+      customerName: "Nam",
+      customerPhone: "0901234567",
+      customerAddress: "123 Lê Lợi, HCM",
+      items,
+    });
+    expect(row.user_id).toBeNull();
+  });
 });
