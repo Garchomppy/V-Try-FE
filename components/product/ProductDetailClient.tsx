@@ -7,6 +7,7 @@ import { Heart, ChevronRight, Star, Ruler, Sparkles, X } from "lucide-react";
 import type { Product } from "@/lib/types/product";
 import { availableFeatures } from "@/app/data/try-on-assets";
 import TryOnModal from "@/components/try-on/TryOnModal";
+import { useCartStore } from "@/lib/store/cart";
 
 export default function ProductDetailClient({ product }: { product: Product }) {
   const [selectedImage, setSelectedImage] = useState(0);
@@ -14,6 +15,9 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
   const [tryOnOpen, setTryOnOpen] = useState(false);
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
+
+  const addItem = useCartStore((s) => s.addItem);
+  const openCart = useCartStore((s) => s.openCart);
 
   const features = availableFeatures(product.tryOn);
   const hasTryOn = features.ar || features.avatar3d || features.sizeSuggestion;
@@ -177,7 +181,20 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 </button>
               )}
               <div className="flex gap-4">
-                <button className="flex-1 bg-black text-white py-4 uppercase font-bold tracking-widest hover:bg-gray-900 transition-colors">
+                <button
+                  onClick={() => {
+                    addItem({
+                      productId: product.id,
+                      name: product.name,
+                      price: finalPrice,
+                      image: product.images[0],
+                      size: selectedSize,
+                      color: product.colors[selectedColor]?.hex ?? "#000000",
+                    });
+                    openCart();
+                  }}
+                  className="flex-1 bg-black text-white py-4 uppercase font-bold tracking-widest hover:bg-gray-900 transition-colors"
+                >
                   Add to Cart
                 </button>
                 <button className="w-14 h-14 flex items-center justify-center border border-gray-300 hover:border-black transition-colors">

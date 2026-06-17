@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import FloatingActions from "@/components/ui/FloatingActions";
+import CartDrawer from "@/components/cart/CartDrawer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -21,17 +22,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${inter.variable} h-full antialiased`}
-    >
+    <html lang="en" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-white text-black">
         <Header />
-        <main className="flex-grow">
-          {children}
-        </main>
+        <main className="flex-grow">{children}</main>
         <Footer />
         <FloatingActions />
+        <CartDrawer />
       </body>
     </html>
   );
