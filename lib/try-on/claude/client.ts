@@ -8,10 +8,22 @@ export function getGemini(): GoogleGenAI {
   if (cached) return cached;
   const apiKey = process.env.ANTHROPIC_API_KEY; // The user used this env var name
   if (!apiKey) {
-    throw new Error("API key is not set. Add it to .env.local.");
+    throw new Error("ANTHROPIC_API_KEY (Gemini key) is not set. Add it to .env.local.");
   }
   cached = new GoogleGenAI({ apiKey });
   return cached;
+}
+
+// ─── Groq fallback (OpenAI-compatible, free tier ~14,400 req/day) ───────────
+export const GROQ_API_BASE = "https://api.groq.com/openai";
+export const GROQ_MODEL = "llama-3.1-8b-instant"; // replaces decommissioned llama3-8b-8192
+
+export function getGroqApiKey(): string {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    throw new Error("GROQ_API_KEY is not set. Add it to .env.local.");
+  }
+  return apiKey;
 }
 
 /*
