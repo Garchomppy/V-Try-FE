@@ -32,7 +32,7 @@ export function mapRowToProduct(row: ProductRow): Product {
 }
 
 export async function getAllProducts(): Promise<Product[]> {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const { data, error } = await supabase
     .from("products")
     .select("*")
@@ -42,7 +42,7 @@ export async function getAllProducts(): Promise<Product[]> {
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const { data, error } = await supabase
     .from("products")
     .select("*")

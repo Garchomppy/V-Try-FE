@@ -23,7 +23,7 @@ export function buildOrderRow(payload: CreateOrderPayload) {
 }
 
 export async function createOrder(payload: CreateOrderPayload): Promise<{ id: string }> {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const { data, error } = await supabase
     .from("orders")
     .insert(buildOrderRow(payload))
