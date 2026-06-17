@@ -265,7 +265,7 @@ export default function ARTryOn({ product }: Props = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const garmentImgRef = useRef<HTMLImageElement | null>(null);
   const smoothedLandmarksRef = useRef<SmoothedLandmark[] | null>(null);
-  const fpsRef = useRef({ count: 0, lastTime: performance.now(), fps: 0 });
+  const fpsRef = useRef({ count: 0, lastTime: 0, fps: 0 });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cameraRef = useRef<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -332,13 +332,15 @@ export default function ARTryOn({ product }: Props = {}) {
 
   // ─── FPS ────────────────────────────────────────────────────────────
   const updateFps = useCallback(() => {
+    const fps = fpsRef.current;
     const now = performance.now();
-    fpsRef.current.count++;
-    if (now - fpsRef.current.lastTime >= 1000) {
-      fpsRef.current.fps = fpsRef.current.count;
-      fpsRef.current.count = 0;
-      fpsRef.current.lastTime = now;
-      setFps(fpsRef.current.fps);
+    if (fps.lastTime === 0) { fps.lastTime = now; return; }
+    fps.count++;
+    if (now - fps.lastTime >= 1000) {
+      fps.fps = fps.count;
+      fps.count = 0;
+      fps.lastTime = now;
+      setFps(fps.fps);
     }
   }, []);
 

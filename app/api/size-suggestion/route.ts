@@ -82,8 +82,9 @@ async function callGemini(
 
       const parsed = sizeSuggestionOutputSchema.safeParse(rawJson);
       return parsed.success ? parsed.data : null;
-    } catch (err: any) {
-      const status = err?.status ?? err?.error?.code;
+    } catch (err: unknown) {
+      const e = err as { status?: number; error?: { code?: number } };
+      const status = e?.status ?? e?.error?.code;
       const isTransient = status === 503 || status === 429;
 
       if (isTransient && attempt < MAX_RETRIES - 1) {
