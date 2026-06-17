@@ -16,9 +16,9 @@ export default function LoginForm() {
     setLoading(true);
     setError("");
     const supabase = createBrowserSupabase();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) {
+    if (authError) {
       setError("Email hoặc mật khẩu không đúng.");
       return;
     }
@@ -29,20 +29,24 @@ export default function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-sm mx-auto">
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider mb-1">Email</label>
+        <label htmlFor="login-email" className="block text-xs font-semibold uppercase tracking-wider mb-1">Email</label>
         <input
+          id="login-email"
           type="email"
           required
+          autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="w-full border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-black"
         />
       </div>
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider mb-1">Mật khẩu</label>
+        <label htmlFor="login-password" className="block text-xs font-semibold uppercase tracking-wider mb-1">Mật khẩu</label>
         <input
+          id="login-password"
           type="password"
           required
+          autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="w-full border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-black"

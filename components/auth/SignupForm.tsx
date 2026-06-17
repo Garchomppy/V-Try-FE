@@ -16,10 +16,10 @@ export default function SignupForm() {
     setLoading(true);
     setError("");
     const supabase = createBrowserSupabase();
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { error: authError } = await supabase.auth.signUp({ email, password });
     setLoading(false);
-    if (error) {
-      setError(error.message);
+    if (authError) {
+      setError(authError.message);
       return;
     }
     router.push("/account");
@@ -29,21 +29,25 @@ export default function SignupForm() {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-sm mx-auto">
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider mb-1">Email</label>
+        <label htmlFor="signup-email" className="block text-xs font-semibold uppercase tracking-wider mb-1">Email</label>
         <input
+          id="signup-email"
           type="email"
           required
+          autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="w-full border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-black"
         />
       </div>
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider mb-1">Mật khẩu</label>
+        <label htmlFor="signup-password" className="block text-xs font-semibold uppercase tracking-wider mb-1">Mật khẩu</label>
         <input
+          id="signup-password"
           type="password"
           required
           minLength={6}
+          autoComplete="new-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="w-full border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-black"
