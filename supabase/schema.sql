@@ -39,3 +39,40 @@ alter table orders enable row level security;
 drop policy if exists "public insert orders" on orders;
 create policy "public insert orders" on orders
   for insert with check (true);
+
+-- ─── Profiles ────────────────────────────────────────────────────────────────
+create table if not exists profiles (
+  id           uuid primary key references auth.users(id) on delete cascade,
+  full_name    text,
+  phone        text,
+  address      text,
+  created_at   timestamptz not null default now()
+);
+
+alter table profiles enable row level security;
+
+drop policy if exists "users manage own profile" on profiles;
+create policy "users manage own profile"
+  on profiles for all
+  using (auth.uid() = id)
+  with check (auth.uid() = id);
+
+create or replace function handle_new_user() returns trigger as $$
+begin
+  insert into public.profiles (id) values (new.id);
+  return new;
+end;
+$$ language plpgsql security definer;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function handle_new_user();
+
+-- ─── Orders: link to user ───────────────────────────────────────────────────
+alter table orders add column if not exists user_id uuid references auth.users(id);
+
+drop policy if exists "users read own orders" on orders;
+create policy "users read own orders"
+  on orders for select
+  using (auth.uid() = user_id);
