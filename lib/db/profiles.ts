@@ -35,7 +35,8 @@ export async function getProfile(userId: string): Promise<Profile | null> {
   return data ? mapRowToProfile(data as ProfileRow) : null;
 }
 
-export async function upsertProfile(
+// profiles row is guaranteed to exist via the handle_new_user trigger, so a plain update suffices
+export async function updateProfile(
   userId: string,
   fields: { fullName?: string; phone?: string; address?: string },
 ): Promise<void> {
@@ -48,5 +49,5 @@ export async function upsertProfile(
       address: fields.address,
     })
     .eq("id", userId);
-  if (error) throw new Error(`upsertProfile: ${error.message}`);
+  if (error) throw new Error(`updateProfile: ${error.message}`);
 }
