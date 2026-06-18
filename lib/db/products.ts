@@ -28,6 +28,7 @@ export function mapRowToProduct(row: ProductRow): Product {
     sizes: row.sizes,
     reviews: row.reviews,
     tryOn: row.try_on ?? undefined,
+    isActive: row.is_active,
   };
 }
 
@@ -50,4 +51,14 @@ export async function getProductById(id: string): Promise<Product | null> {
     .maybeSingle();
   if (error) throw new Error(`getProductById: ${error.message}`);
   return data ? mapRowToProduct(data as ProductRow) : null;
+}
+
+export async function getAllProductsForAdmin(): Promise<Product[]> {
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .order("created_at", { ascending: true });
+  if (error) throw new Error(`getAllProductsForAdmin: ${error.message}`);
+  return (data as ProductRow[]).map(mapRowToProduct);
 }

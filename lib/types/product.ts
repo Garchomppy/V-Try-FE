@@ -36,4 +36,5 @@ export interface Product {
   sizes: string[];
   reviews: { rating: number; count: number };
   tryOn?: TryOnConfig;
+  isActive?: boolean;
 }

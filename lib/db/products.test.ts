@@ -24,6 +24,7 @@ describe("mapRowToProduct", () => {
     expect(typeof p.price).toBe("number");
     expect(p.discountPercentage).toBe(20);
     expect(p.tryOn?.sizing?.fit).toBe("regular");
+    expect(p.isActive).toBe(true);
   });
 
   it("maps null discount and missing try_on", () => {
