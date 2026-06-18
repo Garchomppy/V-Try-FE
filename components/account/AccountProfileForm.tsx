@@ -9,18 +9,26 @@ export default function AccountProfileForm({ profile }: { profile: Profile }) {
   const [address, setAddress] = useState(profile.address ?? "");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setSaved(false);
-    await fetch("/api/profile", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fullName, phone, address }),
-    });
-    setSaving(false);
-    setSaved(true);
+    setError(false);
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName, phone, address }),
+      });
+      setSaved(res.ok);
+      setError(!res.ok);
+    } catch {
+      setError(true);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -60,6 +68,7 @@ export default function AccountProfileForm({ profile }: { profile: Profile }) {
         {saving ? "Đang lưu..." : "Lưu thông tin"}
       </button>
       {saved && <p className="text-sm text-green-600">Đã lưu.</p>}
+      {error && <p className="text-sm text-red-600">Có lỗi xảy ra, vui lòng thử lại.</p>}
     </form>
   );
 }
