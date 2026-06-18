@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
               // MediaPipe scripts + WASM (needs unsafe-eval for WASM compilation)
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net",
               // MediaPipe model/WASM fetch + THREE.js blob textures + Anthropic API + HF Spaces (IDM-VTON)
-              "connect-src 'self' blob: https://cdn.jsdelivr.net https://api.anthropic.com https://generativelanguage.googleapis.com https://*.hf.space https://huggingface.co https://api.gradio.app",
+              "connect-src 'self' blob: https://cdn.jsdelivr.net https://api.anthropic.com https://generativelanguage.googleapis.com https://*.hf.space https://huggingface.co https://api.gradio.app https://*.supabase.co",
               // MediaPipe spawns blob: workers
               "worker-src 'self' blob:",
               // Webcam getUserMedia needs media-src (some browsers check this)
