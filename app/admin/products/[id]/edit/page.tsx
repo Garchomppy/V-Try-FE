@@ -19,9 +19,14 @@ export default async function EditProductPage({ params, searchParams }: Props) {
   const updateWithId = updateProduct.bind(null, id);
 
   return (
-    <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold mb-6">Sửa sản phẩm</h1>
-      <ProductForm action={updateWithId} product={product} error={error} />
+    <div className="max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="mb-8">
+         <h1 className="text-3xl font-bold tracking-tight text-slate-900">Sửa sản phẩm</h1>
+         <p className="text-slate-500 mt-1">Cập nhật thông tin chi tiết của sản phẩm.</p>
+      </div>
+      <div className="bg-white p-8 rounded-2xl border border-slate-200/60 shadow-sm">
+        <ProductForm action={updateWithId} product={product} error={error} />
+      </div>
     </div>
   );
 }

@@ -3,7 +3,12 @@
 import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase/client";
 
-export default function LogoutButton() {
+interface Props {
+  className?: string;
+  children?: React.ReactNode;
+}
+
+export default function LogoutButton({ className, children }: Props) {
   const router = useRouter();
 
   async function handleLogout() {
@@ -16,9 +21,9 @@ export default function LogoutButton() {
   return (
     <button
       onClick={handleLogout}
-      className="text-xs underline hover:text-black"
+      className={className || "text-xs underline hover:text-black"}
     >
-      Đăng xuất
+      {children || "Đăng xuất"}
     </button>
   );
 }
