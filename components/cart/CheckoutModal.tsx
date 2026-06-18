@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import type { CartItem } from "@/lib/store/cart";
 
@@ -32,6 +32,17 @@ export default function CheckoutModal({ items, subtotal, defaultValues, onSucces
     customerAddress: defaultValues?.customerAddress ?? "",
     note: "",
   });
+  useEffect(() => {
+    if (!defaultValues) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncs async profile fetch (resolves after mount) into form state, only filling empty fields
+    setForm((prev) => ({
+      ...prev,
+      customerName: prev.customerName || defaultValues.customerName,
+      customerPhone: prev.customerPhone || defaultValues.customerPhone,
+      customerAddress: prev.customerAddress || defaultValues.customerAddress,
+    }));
+  }, [defaultValues]);
+
   const [screen, setScreen] = useState<ScreenState>("form");
   const [orderId, setOrderId] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
