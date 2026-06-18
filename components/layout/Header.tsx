@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Search, User, Heart } from "lucide-react";
+import { Search, Heart } from "lucide-react";
 import CartButton from "@/components/cart/CartButton";
+import UserMenuButton from "@/components/auth/UserMenuButton";
 
 export default function Header() {
   return (
@@ -33,9 +34,7 @@ export default function Header() {
             <button aria-label="Search" className="hover:text-gray-600">
               <Search className="w-5 h-5" strokeWidth={1.5} />
             </button>
-            <button aria-label="Profile" className="hover:text-gray-600 hidden sm:block">
-              <User className="w-5 h-5" strokeWidth={1.5} />
-            </button>
+            <UserMenuButton />
             <button aria-label="Wishlist" className="hover:text-gray-600 hidden sm:block">
               <Heart className="w-5 h-5" strokeWidth={1.5} />
             </button>
