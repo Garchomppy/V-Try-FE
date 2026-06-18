@@ -58,3 +58,14 @@ export async function getOrdersByUserId(userId: string): Promise<OrderRow[]> {
   if (error) throw new Error(`getOrdersByUserId: ${error.message}`);
   return data as OrderRow[];
 }
+
+export async function getAllOrdersForAdmin(status?: string): Promise<OrderRow[]> {
+  const supabase = await createServerSupabase();
+  let query = supabase.from("orders").select("*").order("created_at", { ascending: false });
+  if (status && status !== "all") {
+    query = query.eq("status", status);
+  }
+  const { data, error } = await query;
+  if (error) throw new Error(`getAllOrdersForAdmin: ${error.message}`);
+  return data as OrderRow[];
+}
