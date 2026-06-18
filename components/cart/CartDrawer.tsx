@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Minus, Plus, Trash2 } from "lucide-react";
 import { useCartStore, cartTotal, cartItemCount } from "@/lib/store/cart";
 import CheckoutModal from "@/components/cart/CheckoutModal";
+import { createBrowserSupabase } from "@/lib/supabase/client";
 
 export default function CartDrawer() {
   const items = useCartStore((s) => s.items);
@@ -14,6 +15,30 @@ export default function CartDrawer() {
   const clearCart = useCartStore((s) => s.clearCart);
 
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [defaultValues, setDefaultValues] = useState<
+    { customerName: string; customerPhone: string; customerAddress: string } | undefined
+  >(undefined);
+
+  useEffect(() => {
+    if (!checkoutOpen) return;
+    const supabase = createBrowserSupabase();
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name, phone, address")
+        .eq("id", data.user.id)
+        .maybeSingle();
+      if (profile) {
+        setDefaultValues({
+          customerName: profile.full_name ?? "",
+          customerPhone: profile.phone ?? "",
+          customerAddress: profile.address ?? "",
+        });
+      }
+    });
+  }, [checkoutOpen]);
+
   const subtotal = cartTotal(items);
   const count = cartItemCount(items);
 
@@ -144,6 +169,7 @@ export default function CartDrawer() {
         <CheckoutModal
           items={items}
           subtotal={subtotal}
+          defaultValues={defaultValues}
           onSuccess={handleSuccess}
           onClose={() => setCheckoutOpen(false)}
         />

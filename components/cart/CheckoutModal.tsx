@@ -7,6 +7,11 @@ import type { CartItem } from "@/lib/store/cart";
 interface Props {
   items: CartItem[];
   subtotal: number;
+  defaultValues?: {
+    customerName: string;
+    customerPhone: string;
+    customerAddress: string;
+  };
   onSuccess: (orderId: string) => void;
   onClose: () => void;
 }
@@ -20,11 +25,11 @@ type FormState = {
 
 type ScreenState = "form" | "loading" | "success" | "error";
 
-export default function CheckoutModal({ items, subtotal, onSuccess, onClose }: Props) {
+export default function CheckoutModal({ items, subtotal, defaultValues, onSuccess, onClose }: Props) {
   const [form, setForm] = useState<FormState>({
-    customerName: "",
-    customerPhone: "",
-    customerAddress: "",
+    customerName: defaultValues?.customerName ?? "",
+    customerPhone: defaultValues?.customerPhone ?? "",
+    customerAddress: defaultValues?.customerAddress ?? "",
     note: "",
   });
   const [screen, setScreen] = useState<ScreenState>("form");

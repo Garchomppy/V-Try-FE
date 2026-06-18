@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { createOrder } from "@/lib/db/orders";
+import { createServerSupabase } from "@/lib/supabase/server";
 import type { CartItem } from "@/lib/store/cart";
 
 export const runtime = "nodejs";
@@ -34,6 +35,9 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: "Cart is empty" }, { status: 400 });
   }
 
+  const supabase = await createServerSupabase();
+  const { data: authData } = await supabase.auth.getUser();
+
   try {
     const { id } = await createOrder({
       customerName,
@@ -41,6 +45,7 @@ export async function POST(req: NextRequest) {
       customerAddress,
       note,
       items,
+      userId: authData.user?.id,
     });
     return Response.json({ id });
   } catch (err) {
