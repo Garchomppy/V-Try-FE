@@ -6,7 +6,15 @@ import LoginForm from "@/components/auth/LoginForm";
 export default async function LoginPage() {
   const supabase = await createServerSupabase();
   const { data } = await supabase.auth.getUser();
-  if (data.user) redirect("/account");
+  if (data.user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", data.user.id)
+      .maybeSingle();
+    if (profile?.role === "admin") redirect("/admin");
+    redirect("/account");
+  }
 
   return (
     <div className="container mx-auto px-4 py-16">

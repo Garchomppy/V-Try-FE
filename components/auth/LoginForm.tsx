@@ -22,7 +22,16 @@ export default function LoginForm() {
       setError("Email hoặc mật khẩu không đúng.");
       return;
     }
-    router.push("/account");
+    // Check role before redirecting
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("role")
+      .maybeSingle();
+    if (profileData?.role === "admin") {
+      router.push("/admin");
+    } else {
+      router.push("/account");
+    }
     router.refresh();
   }
 
