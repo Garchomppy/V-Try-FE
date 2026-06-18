@@ -6,6 +6,8 @@ import Footer from "@/components/layout/Footer";
 import FloatingActions from "@/components/ui/FloatingActions";
 import CartDrawer from "@/components/cart/CartDrawer";
 
+import ConditionalShopLayout from "@/components/layout/ConditionalShopLayout";
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
@@ -27,11 +29,14 @@ export default function RootLayout({
       className={`${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white text-black">
-        <Header />
-        <main className="flex-grow">{children}</main>
-        <Footer />
-        <FloatingActions />
-        <CartDrawer />
+        <ConditionalShopLayout
+          header={<Header />}
+          footer={<Footer />}
+          floatingActions={<FloatingActions />}
+          cartDrawer={<CartDrawer />}
+        >
+          {children}
+        </ConditionalShopLayout>
       </body>
     </html>
   );

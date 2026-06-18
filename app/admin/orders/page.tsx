@@ -39,58 +39,65 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
   const orders = await getAllOrdersForAdmin(status);
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Đơn hàng</h1>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-500">Lọc theo trạng thái:</span>
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Đơn hàng</h1>
+          <p className="text-slate-500 mt-1">Quản lý và cập nhật trạng thái đơn hàng</p>
+        </div>
+        <div className="flex items-center gap-3 bg-white p-2 rounded-xl border border-slate-200/60 shadow-sm">
+          <span className="text-sm font-medium text-slate-500 pl-2">Lọc theo trạng thái:</span>
           <OrderStatusFilter currentStatus={status ?? "all"} />
         </div>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Mã đơn</TableHead>
-            <TableHead>Khách hàng</TableHead>
-            <TableHead>SĐT</TableHead>
-            <TableHead>Tổng tiền</TableHead>
-            <TableHead>Ngày đặt</TableHead>
-            <TableHead>Trạng thái</TableHead>
-            <TableHead>Đổi trạng thái</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {orders.map((order) => (
-            <TableRow key={order.id}>
-              <TableCell className="font-mono text-xs text-gray-500">
-                {order.id.slice(0, 8)}…
-              </TableCell>
-              <TableCell>{order.customer_name}</TableCell>
-              <TableCell>{order.customer_phone}</TableCell>
-              <TableCell>${Number(order.subtotal).toFixed(2)}</TableCell>
-              <TableCell>
-                {new Date(order.created_at).toLocaleDateString("vi-VN")}
-              </TableCell>
-              <TableCell>
-                <Badge variant={STATUS_VARIANT[order.status] ?? "outline"}>
-                  {STATUS_LABELS[order.status] ?? order.status}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <OrderStatusSelect orderId={order.id} currentStatus={order.status} />
-              </TableCell>
-            </TableRow>
-          ))}
-          {orders.length === 0 && (
+      <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+        <Table>
+          <TableHeader className="bg-slate-50/50">
             <TableRow>
-              <TableCell colSpan={7} className="text-center text-gray-400">
-                Không có đơn hàng nào.
-              </TableCell>
+              <TableHead className="py-4">Mã đơn</TableHead>
+              <TableHead className="py-4">Khách hàng</TableHead>
+              <TableHead className="py-4">SĐT</TableHead>
+              <TableHead className="py-4">Tổng tiền</TableHead>
+              <TableHead className="py-4">Ngày đặt</TableHead>
+              <TableHead className="py-4">Trạng thái</TableHead>
+              <TableHead className="py-4 text-right">Đổi trạng thái</TableHead>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {orders.map((order) => (
+              <TableRow key={order.id} className="hover:bg-slate-50/50">
+                <TableCell className="font-mono text-xs text-slate-500 py-3">
+                  {order.id.slice(0, 8)}…
+                </TableCell>
+                <TableCell className="font-medium text-slate-900 py-3">{order.customer_name}</TableCell>
+                <TableCell className="text-slate-600 py-3">{order.customer_phone}</TableCell>
+                <TableCell className="text-slate-600 font-medium py-3">${Number(order.subtotal).toFixed(2)}</TableCell>
+                <TableCell className="text-slate-600 py-3">
+                  {new Date(order.created_at).toLocaleDateString("vi-VN")}
+                </TableCell>
+                <TableCell className="py-3">
+                  <Badge variant={STATUS_VARIANT[order.status] ?? "outline"} className={order.status === "pending" ? "bg-amber-100 text-amber-700 hover:bg-amber-100 border-amber-200" : order.status === "shipped" || order.status === "confirmed" ? "bg-blue-100 text-blue-700 hover:bg-blue-100 border-blue-200" : order.status === "delivered" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200" : ""}>
+                    {STATUS_LABELS[order.status] ?? order.status}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right py-3">
+                  <div className="flex justify-end">
+                     <OrderStatusSelect orderId={order.id} currentStatus={order.status} />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+            {orders.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={7} className="h-32 text-center text-slate-500">
+                  Không có đơn hàng nào.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
