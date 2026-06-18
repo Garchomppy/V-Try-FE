@@ -76,3 +76,18 @@ drop policy if exists "users read own orders" on orders;
 create policy "users read own orders"
   on orders for select
   using (auth.uid() = user_id);
+
+-- ─── Admin role ──────────────────────────────────────────────────────────────
+alter table profiles add column if not exists role text not null default 'customer';
+
+drop policy if exists "admin manage all orders" on orders;
+create policy "admin manage all orders"
+  on orders for all
+  using (exists (select 1 from profiles where id = auth.uid() and role = 'admin'))
+  with check (exists (select 1 from profiles where id = auth.uid() and role = 'admin'));
+
+drop policy if exists "admin manage all products" on products;
+create policy "admin manage all products"
+  on products for all
+  using (exists (select 1 from profiles where id = auth.uid() and role = 'admin'))
+  with check (exists (select 1 from profiles where id = auth.uid() and role = 'admin'));
