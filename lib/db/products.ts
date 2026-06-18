@@ -53,6 +53,7 @@ export async function getProductById(id: string): Promise<Product | null> {
   return data ? mapRowToProduct(data as ProductRow) : null;
 }
 
+// No is_active filter here — RLS restricts rows to admin-visible vs public based on session, not this query.
 export async function getAllProductsForAdmin(): Promise<Product[]> {
   const supabase = await createServerSupabase();
   const { data, error } = await supabase
