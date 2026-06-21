@@ -634,13 +634,20 @@ export default function ARTryOn({ product }: Props = {}) {
       try {
         setLoadingProgress("Loading AI Pose Model...");
 
-        const loadScriptGlobal = async (url: string, globalName: string) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          if (typeof (window as any)[globalName] === "function") return;
-          const res = await fetch(url);
-          if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`);
-          const code = await res.text();
-          (0, eval)(code); // indirect eval → runs in global scope
+        const loadScriptGlobal = (url: string, globalName: string) => {
+          return new Promise<void>((resolve, reject) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if (typeof (window as any)[globalName] === "function") {
+              resolve();
+              return;
+            }
+            const script = document.createElement("script");
+            script.src = url;
+            script.crossOrigin = "anonymous";
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error(`Failed to load script ${url}`));
+            document.body.appendChild(script);
+          });
         };
 
         await loadScriptGlobal(
