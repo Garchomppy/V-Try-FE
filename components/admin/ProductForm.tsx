@@ -146,13 +146,27 @@ export default function ProductForm({ action, product, error }: Props) {
               name="images"
               defaultValue={imagesDefault}
               rows={3}
-              required
               className="bg-slate-50 border-slate-200 focus-visible:ring-purple-500 rounded-xl font-mono text-sm resize-none"
               placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
             />
             <p className="text-xs text-slate-500">
-              Mỗi URL hình ảnh nằm trên một dòng riêng biệt.
+              Mỗi URL hình ảnh nằm trên một dòng riêng biệt. Hoặc có thể tải ảnh
+              từ máy tính ở dưới.
             </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="imageFiles" className="text-slate-700 font-medium">
+              Tải ảnh từ máy (Tùy chọn)
+            </Label>
+            <Input
+              id="imageFiles"
+              name="imageFiles"
+              type="file"
+              accept="image/*"
+              multiple
+              className="bg-slate-50 border-slate-200 focus-visible:ring-purple-500 rounded-xl file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 cursor-pointer"
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

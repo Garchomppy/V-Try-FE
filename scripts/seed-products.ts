@@ -7,7 +7,9 @@ const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 if (!url || !serviceKey) throw new Error("Missing Supabase env for seed");
 
-const supabase = createClient(url, serviceKey, { auth: { persistSession: false } });
+const supabase = createClient(url, serviceKey, {
+  auth: { persistSession: false },
+});
 
 async function main() {
   const rows = products.map((p) => ({
@@ -22,10 +24,18 @@ async function main() {
     try_on: p.tryOn ?? null,
     is_active: true,
   }));
-  const { data, error } = await supabase.from("products").insert(rows).select("id, name");
+  const { data, error } = await supabase
+    .from("products")
+    .insert(rows)
+    .select("id, name");
   if (error) throw error;
   console.log(`Seeded ${data.length} products:`);
   data.forEach((d) => console.log(`  ${d.id}  ${d.name}`));
 }
 
-main().then(() => process.exit(0)).catch((e) => { console.error(e); process.exit(1); });
+main()
+  .then(() => process.exit(0))
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });

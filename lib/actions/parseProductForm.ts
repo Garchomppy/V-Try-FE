@@ -4,6 +4,7 @@ export interface ParsedProductInput {
   price: number;
   discountPercentage: number | null;
   images: string[];
+  imageFiles: File[];
   colors: { name: string; hex: string }[];
   sizes: string[];
 }
@@ -38,5 +39,9 @@ export function parseProductFormData(formData: FormData): ParsedProductInput {
     .map((s) => s.trim())
     .filter(Boolean);
 
-  return { name, description, price, discountPercentage, images, colors, sizes };
+  const imageFiles = formData.getAll("imageFiles").filter(
+    (f): f is File => f !== null && typeof f === "object" && "size" in f && (f as File).size > 0
+  );
+
+  return { name, description, price, discountPercentage, images, imageFiles, colors, sizes };
 }
