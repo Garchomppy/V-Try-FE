@@ -20,9 +20,10 @@ export default function ConditionalShopLayout({
 }: Props) {
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith("/admin");
+  const isAuthPage = pathname === "/login" || pathname === "/signup";
 
-  if (isAdmin) {
-    return <>{children}</>;
+  if (isAdmin || isAuthPage) {
+    return <div className="min-h-screen bg-slate-50 flex flex-col">{children}</div>;
   }
 
   return (

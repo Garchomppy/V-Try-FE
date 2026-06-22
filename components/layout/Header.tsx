@@ -19,7 +19,11 @@ export default function Header() {
           </div>
 
           {/* Center Menu */}
-          <nav className="hidden md:flex space-x-8">
+          <nav className="hidden md:flex space-x-8 items-center">
+            <Link href="/promotions" className="text-sm font-bold text-indigo-600 hover:text-indigo-500 uppercase flex items-center gap-1">
+              <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full animate-ping" />
+              Promotions
+            </Link>
             <Link href="/mid-season" className="text-sm font-medium hover:text-gray-600 uppercase">Mid Season</Link>
             <Link href="/men" className="text-sm font-medium hover:text-gray-600 uppercase">Men</Link>
             <Link href="/women" className="text-sm font-medium hover:text-gray-600 uppercase">Women</Link>
