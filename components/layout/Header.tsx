@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Search, Heart, Sparkles } from "lucide-react";
+import { Search, Heart, Sparkles, Radio } from "lucide-react";
 import CartButton from "@/components/cart/CartButton";
 import UserMenuButton from "@/components/auth/UserMenuButton";
 
@@ -23,6 +23,10 @@ export default function Header() {
             <Link href="/promotions" className="text-sm font-bold text-indigo-600 hover:text-indigo-500 uppercase flex items-center gap-1">
               <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full animate-ping" />
               Promotions
+            </Link>
+            <Link href="/live" className="text-sm font-bold text-red-600 hover:opacity-80 uppercase flex items-center gap-1">
+              <Radio className="w-3.5 h-3.5" />
+              Live
             </Link>
             <Link href="/styling" className="text-sm font-bold text-[#FF6F61] hover:opacity-80 uppercase flex items-center gap-1">
               <Sparkles className="w-3.5 h-3.5" />
