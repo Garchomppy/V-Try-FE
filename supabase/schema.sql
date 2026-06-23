@@ -91,3 +91,27 @@ create policy "admin manage all products"
   on products for all
   using (exists (select 1 from profiles where id = auth.uid() and role = 'admin'))
   with check (exists (select 1 from profiles where id = auth.uid() and role = 'admin'));
+
+-- ─── Looks (Mix & Match outfits saved by users) ──────────────────────────────
+create table if not exists looks (
+  id               uuid primary key default gen_random_uuid(),
+  user_id          uuid not null references auth.users(id) on delete cascade,
+  name             text not null,
+  item_product_ids jsonb not null default '[]',
+  created_at       timestamptz not null default now()
+);
+
+alter table looks enable row level security;
+
+-- Anyone can read a look (needed for public share links).
+drop policy if exists "public read looks" on looks;
+create policy "public read looks"
+  on looks for select
+  using (true);
+
+-- Only the owner can create / update / delete their looks.
+drop policy if exists "users manage own looks" on looks;
+create policy "users manage own looks"
+  on looks for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
