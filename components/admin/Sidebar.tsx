@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, ShoppingCart, LogOut, Tag } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, LogOut, Tag, Radio } from "lucide-react";
 import LogoutButton from "@/components/account/LogoutButton";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +14,7 @@ export default function Sidebar() {
     { href: "/admin/products", label: "Sản phẩm", icon: Package },
     { href: "/admin/promotions", label: "Khuyến mãi", icon: Tag },
     { href: "/admin/orders", label: "Đơn hàng", icon: ShoppingCart },
+    { href: "/admin/live", label: "Livestream", icon: Radio },
   ];
 
   return (
