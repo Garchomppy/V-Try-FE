@@ -22,7 +22,7 @@
  *             Falls back to the built-in GARMENTS demo list when omitted.
  */
 
-import { useRef, useEffect, useState, useCallback } from "react";
+import React, { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import type { Product } from "@/app/data/products";
 import Webcam from "react-webcam";
 import {
@@ -243,7 +243,7 @@ export default function ARTryOn({ product }: Props = {}) {
   // ─── EFFECTIVE GARMENTS ───────────────────────────────────────────────────
   // Single-product mode: derive one GarmentOption from the product's arOverlay.
   // Demo / standalone mode: fall back to the built-in GARMENTS list.
-  const effectiveGarments: GarmentOption[] = product?.tryOn?.arOverlay
+  const effectiveGarments = useMemo<GarmentOption[]>(() => product?.tryOn?.arOverlay
     ? [
       {
         id: product.id,
@@ -256,7 +256,7 @@ export default function ARTryOn({ product }: Props = {}) {
         description: product.description,
       },
     ]
-    : GARMENTS;
+    : GARMENTS, [product]);
 
   // True when a specific product was passed in (single-garment mode)
   const isSingleProductMode = effectiveGarments.length === 1;
@@ -414,7 +414,7 @@ export default function ARTryOn({ product }: Props = {}) {
         }
       }, 1000);
     },
-    [triggerAISnapshot],
+    [triggerAISnapshot, effectiveGarments],
   );
 
   const cancelCountdown = useCallback(() => {

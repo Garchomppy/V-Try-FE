@@ -57,10 +57,9 @@ export async function POST(req: NextRequest) {
   // Parse body
   let personImageBase64: string;
   let garmentId: string;
-  let garmentDescription: string;
   let garmentImageBase64: string | undefined;
   try {
-    ({ personImageBase64, garmentId, garmentDescription, garmentImageBase64 } = await req.json());
+    ({ personImageBase64, garmentId, garmentImageBase64 } = await req.json());
     if (!personImageBase64 || !garmentId) throw new Error("Missing fields");
   } catch {
     return NextResponse.json(
