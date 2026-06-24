@@ -332,14 +332,15 @@ export default function ARTryOn({ product }: Props = {}) {
 
   // ─── FPS ────────────────────────────────────────────────────────────
   const updateFps = useCallback(() => {
+    const fps = fpsRef.current;
     const now = performance.now();
-    if (fpsRef.current.lastTime === 0) fpsRef.current.lastTime = now;
-    fpsRef.current.count++;
-    if (now - fpsRef.current.lastTime >= 1000) {
-      fpsRef.current.fps = fpsRef.current.count;
-      fpsRef.current.count = 0;
-      fpsRef.current.lastTime = now;
-      setFps(fpsRef.current.fps);
+    if (fps.lastTime === 0) { fps.lastTime = now; return; }
+    fps.count++;
+    if (now - fps.lastTime >= 1000) {
+      fps.fps = fps.count;
+      fps.count = 0;
+      fps.lastTime = now;
+      setFps(fps.fps);
     }
   }, []);
 
@@ -644,7 +645,7 @@ export default function ARTryOn({ product }: Props = {}) {
             script.src = url;
             script.crossOrigin = "anonymous";
             script.onload = () => resolve();
-            script.onerror = () => reject(new Error(`Failed to fetch ${url}`));
+            script.onerror = () => reject(new Error(`Failed to load script ${url}`));
             document.body.appendChild(script);
           });
         };

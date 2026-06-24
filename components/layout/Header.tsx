@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { Search, User, Heart, ShoppingBag } from "lucide-react";
+import { Search, Heart, Sparkles, Radio } from "lucide-react";
+import CartButton from "@/components/cart/CartButton";
+import UserMenuButton from "@/components/auth/UserMenuButton";
 
 export default function Header() {
   return (
@@ -17,43 +19,25 @@ export default function Header() {
           </div>
 
           {/* Center Menu */}
-          <nav className="hidden md:flex space-x-8">
-            <Link
-              href="/mid-season"
-              className="text-sm font-medium hover:text-gray-600 uppercase"
-            >
-              Mid Season
+          <nav className="hidden md:flex space-x-8 items-center">
+            <Link href="/promotions" className="text-sm font-bold text-indigo-600 hover:text-indigo-500 uppercase flex items-center gap-1">
+              <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full animate-ping" />
+              Promotions
             </Link>
-            <Link
-              href="/men"
-              className="text-sm font-medium hover:text-gray-600 uppercase"
-            >
-              Men
+            <Link href="/live" className="text-sm font-bold text-red-600 hover:opacity-80 uppercase flex items-center gap-1">
+              <Radio className="w-3.5 h-3.5" />
+              Live
             </Link>
-            <Link
-              href="/women"
-              className="text-sm font-medium hover:text-gray-600 uppercase"
-            >
-              Women
+            <Link href="/styling" className="text-sm font-bold text-[#FF6F61] hover:opacity-80 uppercase flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5" />
+              Phối đồ
             </Link>
-            <Link
-              href="/kids"
-              className="text-sm font-medium hover:text-gray-600 uppercase"
-            >
-              Kids
-            </Link>
-            <Link
-              href="/athletics"
-              className="text-sm font-medium hover:text-gray-600 uppercase"
-            >
-              Athletics
-            </Link>
-            <Link
-              href="/explore"
-              className="text-sm font-medium hover:text-gray-600 uppercase"
-            >
-              Explore
-            </Link>
+            <Link href="/mid-season" className="text-sm font-medium hover:text-gray-600 uppercase">Mid Season</Link>
+            <Link href="/men" className="text-sm font-medium hover:text-gray-600 uppercase">Men</Link>
+            <Link href="/women" className="text-sm font-medium hover:text-gray-600 uppercase">Women</Link>
+            <Link href="/kids" className="text-sm font-medium hover:text-gray-600 uppercase">Kids</Link>
+            <Link href="/athletics" className="text-sm font-medium hover:text-gray-600 uppercase">Athletics</Link>
+            <Link href="/explore" className="text-sm font-medium hover:text-gray-600 uppercase">Explore</Link>
           </nav>
 
           {/* Right Menu */}
@@ -62,21 +46,11 @@ export default function Header() {
             <button aria-label="Search" className="hover:text-gray-600">
               <Search className="w-5 h-5" strokeWidth={1.5} />
             </button>
-            <button
-              aria-label="Profile"
-              className="hover:text-gray-600 hidden sm:block"
-            >
-              <User className="w-5 h-5" strokeWidth={1.5} />
-            </button>
-            <button
-              aria-label="Wishlist"
-              className="hover:text-gray-600 hidden sm:block"
-            >
+            <UserMenuButton />
+            <button aria-label="Wishlist" className="hover:text-gray-600 hidden sm:block">
               <Heart className="w-5 h-5" strokeWidth={1.5} />
             </button>
-            <button aria-label="Cart" className="hover:text-gray-600">
-              <ShoppingBag className="w-5 h-5" strokeWidth={1.5} />
-            </button>
+            <CartButton />
           </div>
         </div>
       </div>
