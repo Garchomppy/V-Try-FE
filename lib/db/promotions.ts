@@ -1,4 +1,7 @@
 import { createServerSupabase } from "@/lib/supabase/server";
+import { SupabaseClient } from "@supabase/supabase-js";
+import type { ProductRow } from "./products";
+import type { Product } from "@/lib/types/product";
 
 export interface Promotion {
   id: string;
@@ -66,11 +69,11 @@ export async function getPromotionProducts(promotionId: string): Promise<string[
     .eq("promotion_id", promotionId);
 
   if (error) throw new Error(`getPromotionProducts: ${error.message}`);
-  return data.map((d: any) => d.product_id);
+  return data.map((d: { product_id: string }) => d.product_id);
 }
 
 export async function validatePromotionOverlap(
-  supabase: any,
+  supabase: SupabaseClient,
   productIds: string[],
   startDate: string | null,
   endDate: string | null,
@@ -103,7 +106,7 @@ export async function validatePromotionOverlap(
   const newEnd = endDate ? new Date(endDate) : null;
 
   for (const link of existingLinks) {
-    const promo = link.promotion as any;
+    const promo = link.promotion as unknown as PromotionRow;
     if (!promo) continue;
     if (!promo.is_active) continue;
     if (excludePromotionId && promo.id === excludePromotionId) continue;
@@ -303,7 +306,7 @@ export async function deletePromotion(id: string): Promise<void> {
 }
 
 export async function getActivePromotionsWithProducts(): Promise<
-  (Promotion & { products: any[] })[]
+  (Promotion & { products: Product[] })[]
 > {
   const supabase = await createServerSupabase();
 
@@ -331,7 +334,7 @@ export async function getActivePromotionsWithProducts(): Promise<
 
   // Dynamic import or function call to map product row to product type
   const { mapRowToProduct } = await import("./products");
-  const allProducts = (productsData as any[]).map(mapRowToProduct);
+  const allProducts = (productsData as ProductRow[]).map(mapRowToProduct);
 
   // 3. Fetch all junction links
   const { data: linksData, error: linksError } = await supabase
@@ -344,8 +347,8 @@ export async function getActivePromotionsWithProducts(): Promise<
   // Combine
   return promotions.map((promo) => {
     const matchedProductIds = (linksData || [])
-      .filter((link: any) => link.promotion_id === promo.id)
-      .map((link: any) => link.product_id);
+      .filter((link: { promotion_id: string, product_id: string }) => link.promotion_id === promo.id)
+      .map((link: { promotion_id: string, product_id: string }) => link.product_id);
 
     const promoProducts = allProducts.filter((prod) =>
       matchedProductIds.includes(prod.id)

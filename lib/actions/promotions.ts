@@ -40,7 +40,8 @@ export async function createPromotionAction(
       },
       productIds
     );
-  } catch (error: any) {
+  } catch (err: unknown) {
+    const error = err as Error;
     redirect(
       `/admin/promotions/new?error=${encodeURIComponent(
         error.message || "Đã xảy ra lỗi khi tạo chương trình khuyến mãi"
@@ -90,7 +91,8 @@ export async function updatePromotionAction(
       },
       productIds
     );
-  } catch (error: any) {
+  } catch (err: unknown) {
+    const error = err as Error;
     redirect(
       `/admin/promotions/${id}/edit?error=${encodeURIComponent(
         error.message || "Đã xảy ra lỗi khi cập nhật chương trình khuyến mãi"
@@ -107,7 +109,8 @@ export async function deletePromotionAction(id: string): Promise<void> {
   await requireAdmin();
   try {
     await deletePromotion(id);
-  } catch (error: any) {
+  } catch (err: unknown) {
+    const error = err as Error;
     throw new Error(`Xóa khuyến mãi thất bại: ${error.message}`);
   }
   revalidatePath("/admin/promotions");

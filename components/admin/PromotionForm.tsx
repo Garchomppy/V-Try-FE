@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -24,7 +24,9 @@ export default function PromotionForm({
   initialSelectedProductIds = [],
   error,
 }: Props) {
-  const [selectedProductIds, setSelectedProductIds] = useState<string[]>(initialSelectedProductIds);
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>(
+    initialSelectedProductIds,
+  );
   const [loading, setLoading] = useState(false);
   const [clientError, setClientError] = useState<string | null>(null);
 
@@ -34,7 +36,7 @@ export default function PromotionForm({
     setSelectedProductIds((prev) =>
       prev.includes(productId)
         ? prev.filter((id) => id !== productId)
-        : [...prev, productId]
+        : [...prev, productId],
     );
   }
 
@@ -53,7 +55,15 @@ export default function PromotionForm({
     ? new Date(promotion.endDate).toISOString().slice(0, 16)
     : "";
 
-  const nowLocalStr = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  const [nowLocalStr, setNowLocalStr] = useState<string>("");
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNowLocalStr(
+      new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 16),
+    );
+  }, []);
 
   return (
     <form
@@ -65,7 +75,9 @@ export default function PromotionForm({
         const form = e.currentTarget;
         const formData = new FormData(form);
         const name = formData.get("name") as string;
-        const discountPercentageStr = formData.get("discountPercentage") as string;
+        const discountPercentageStr = formData.get(
+          "discountPercentage",
+        ) as string;
         const startDate = formData.get("startDate") as string;
         const endDate = formData.get("endDate") as string;
 
@@ -76,7 +88,11 @@ export default function PromotionForm({
         }
 
         const discountPercentage = parseInt(discountPercentageStr, 10);
-        if (isNaN(discountPercentage) || discountPercentage < 0 || discountPercentage > 100) {
+        if (
+          isNaN(discountPercentage) ||
+          discountPercentage < 0 ||
+          discountPercentage > 100
+        ) {
           setClientError("Phần trăm giảm giá phải từ 0% đến 100%");
           setLoading(false);
           return;
@@ -104,7 +120,9 @@ export default function PromotionForm({
         }
 
         if (selectedProductIds.length === 0) {
-          setClientError("Vui lòng chọn ít nhất 01 sản phẩm để áp dụng chương trình khuyến mãi");
+          setClientError(
+            "Vui lòng chọn ít nhất 01 sản phẩm để áp dụng chương trình khuyến mãi",
+          );
           setLoading(false);
           return;
         }
@@ -174,7 +192,10 @@ export default function PromotionForm({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="discountPercentage" className="text-slate-700 font-medium">
+            <Label
+              htmlFor="discountPercentage"
+              className="text-slate-700 font-medium"
+            >
               Phần trăm giảm giá (%)
             </Label>
             <div className="relative">
@@ -267,7 +288,9 @@ export default function PromotionForm({
             onClick={handleSelectAll}
             className="rounded-lg text-xs"
           >
-            {selectedProductIds.length === products.length ? "Bỏ chọn tất cả" : "Chọn tất cả"}
+            {selectedProductIds.length === products.length
+              ? "Bỏ chọn tất cả"
+              : "Chọn tất cả"}
           </Button>
         </div>
 
@@ -292,14 +315,28 @@ export default function PromotionForm({
                   }`}
                 >
                   {isChecked && (
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    <svg
+                      className="w-3.5 h-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={3}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M5 13l4 4L19 7"
+                      />
                     </svg>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-slate-800 truncate">{product.name}</p>
-                  <p className="text-xs text-slate-500">${product.price.toFixed(2)}</p>
+                  <p className="text-sm font-semibold text-slate-800 truncate">
+                    {product.name}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    ${product.price.toFixed(2)}
+                  </p>
                 </div>
               </div>
             );
@@ -313,7 +350,11 @@ export default function PromotionForm({
           disabled={loading}
           className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl px-6 py-2.5 transition-all shadow-sm"
         >
-          {loading ? "Đang lưu..." : promotion ? "Cập nhật khuyến mãi" : "Tạo khuyến mãi"}
+          {loading
+            ? "Đang lưu..."
+            : promotion
+              ? "Cập nhật khuyến mãi"
+              : "Tạo khuyến mãi"}
         </Button>
       </div>
     </form>

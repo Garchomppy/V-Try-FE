@@ -98,7 +98,7 @@ export default async function LoginPage() {
           </div>
 
           <div className="text-center text-sm text-neutral-500">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/signup" className="font-semibold text-indigo-600 hover:text-indigo-500 underline transition-colors">
               Register now
             </Link>

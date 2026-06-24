@@ -5,9 +5,10 @@ import { revalidatePath } from "next/cache";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/isAdmin";
 import { parseProductFormData } from "@/lib/actions/parseProductForm";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 async function uploadImageFiles(
-  supabase: any,
+  supabase: SupabaseClient,
   files: File[],
 ): Promise<string[]> {
   const urls: string[] = [];
