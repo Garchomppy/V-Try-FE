@@ -772,7 +772,6 @@ export default function ARTryOn({ product }: Props = {}) {
       handsRef.current?.close();
       if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ─── SNAPSHOT (MANUAL) ───────────────────────────────────────────────

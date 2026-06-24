@@ -1,14 +1,12 @@
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/admin/SubmitButton";
 import {
   Package,
   DollarSign,
   Image as ImageIcon,
   AlertCircle,
-  Sparkles,
 } from "lucide-react";
 import type { Product } from "@/lib/types/product";
 

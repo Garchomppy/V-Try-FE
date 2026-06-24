@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { User, ShoppingBag, Tag, Copy, Check } from "lucide-react";
+import { User, ShoppingBag, Tag } from "lucide-react";
 import AccountProfileForm from "./AccountProfileForm";
 import OrderHistoryList from "./OrderHistoryList";
 import type { Profile } from "@/lib/db/profiles";
@@ -18,7 +18,6 @@ export default function AccountTabs({ profile, orders, promotions }: Props) {
   const [activeTab, setActiveTab] = useState<
     "profile" | "orders" | "promotions"
   >("profile");
-  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const tabs = [
     { id: "profile", label: "Hồ sơ cá nhân", icon: User },
@@ -41,11 +40,7 @@ export default function AccountTabs({ profile, orders, promotions }: Props) {
     count?: number;
   }[];
 
-  const copyCode = (code: string, id: string) => {
-    navigator.clipboard.writeText(code);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
-  };
+
 
   return (
     <div className="flex flex-col md:flex-row gap-8">
@@ -137,8 +132,6 @@ export default function AccountTabs({ profile, orders, promotions }: Props) {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {promotions.map((promo) => {
-                    const mockCode = `VTRY${promo.discountPercentage}`;
-                    const isCopied = copiedId === promo.id;
                     return (
                       <div
                         key={promo.id}
